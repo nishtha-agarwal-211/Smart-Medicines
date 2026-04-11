@@ -1,0 +1,185 @@
+/* === MEDICATION LIST === */
+.medications-container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
+
+.medications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-add {
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+  background: var(--primary-blue-dark);
+}
+
+.medications-list {
+  padding: var(--spacing-lg);
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.medication-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+}
+
+.medication-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.medication-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.medication-card-header:hover {
+  background: var(--gray-50);
+}
+
+.medication-icon {
+  font-size: var(--font-size-3xl);
+  flex-shrink: 0;
+}
+
+.medication-title {
+  flex: 1;
+}
+
+.medication-title h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+
+.medication-title p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  color: var(--gray-600);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+}
+
+.medication-card-body {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  border-top: 1px solid var(--gray-100);
+}
+
+.medication-detail {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.medication-detail:last-of-type {
+  border-bottom: none;
+}
+
+.medication-detail svg,
+.medication-detail>span:first-child {
+  color: var(--primary-blue);
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.medication-detail strong {
+  display: block;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+
+.medication-detail p,
+.medication-detail ul {
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.medication-warning {
+  background: var(--warning-orange-light);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-xs) 0;
+}
+
+.medication-detail ul {
+  padding-left: var(--spacing-md);
+}
+
+.ai-badge {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--info-purple-light);
+  color: var(--info-purple);
+  border-radius: var(--border-radius);
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.medication-actions {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--gray-100);
+}
+
+.btn-delete {
+  background: transparent;
+  border: 1px solid var(--danger-red);
+  color: var(--danger-red);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+  background: var(--danger-red);
+  color: white;
+}
+

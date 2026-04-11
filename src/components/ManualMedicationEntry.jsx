@@ -16,7 +16,8 @@ export default function ManualMedicationEntry({ onNavigate }) {
         duration: '',
         warnings: [],
         prescribedBy: '',
-        notes: ''
+        notes: '',
+        quantity: ''
     });
 
     const [warningInput, setWarningInput] = useState('');
@@ -117,7 +118,8 @@ export default function ManualMedicationEntry({ onNavigate }) {
             prescribedBy: formData.prescribedBy,
             notes: formData.notes,
             manuallyAdded: true,
-            startDate: new Date().toISOString().split('T')[0]
+            startDate: new Date().toISOString().split('T')[0],
+            pillsRemaining: formData.quantity !== '' ? Number(formData.quantity) : undefined,
         };
 
         addMedication(medication);
@@ -315,6 +317,20 @@ export default function ManualMedicationEntry({ onNavigate }) {
                             rows={3}
                             value={formData.notes}
                             onChange={(e) => handleInputChange('notes', e.target.value)}
+                        />
+                    </div>
+
+                    {/* Quantity for refill tracker */}
+                    <div className="form-group">
+                        <label htmlFor="quantity">Pills in Bottle (optional)</label>
+                        <input
+                            id="quantity"
+                            type="number"
+                            min="0"
+                            className="form-input"
+                            placeholder="e.g., 30 — used for low supply alerts"
+                            value={formData.quantity}
+                            onChange={(e) => handleInputChange('quantity', e.target.value)}
                         />
                     </div>
 

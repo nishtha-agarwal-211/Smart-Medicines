@@ -30,31 +30,35 @@ export function MedicationProvider({ children }) {
         }
     }, []);
 
-    // Save medications to localStorage whenever they change
+    // Save medications to localStorage whenever they change (always, even empty)
     useEffect(() => {
-        if (medications.length > 0) {
-            localStorage.setItem('medications', JSON.stringify(medications));
-        }
+        localStorage.setItem('medications', JSON.stringify(medications));
     }, [medications]);
 
-    // Save adherence logs to localStorage
+    // Save adherence logs to localStorage (always, even empty)
     useEffect(() => {
-        if (adherenceLogs.length > 0) {
-            localStorage.setItem('adherenceLogs', JSON.stringify(adherenceLogs));
-        }
+        localStorage.setItem('adherenceLogs', JSON.stringify(adherenceLogs));
     }, [adherenceLogs]);
 
     // Schedule reminders whenever medications change
     useEffect(() => {
-        // Clear existing reminders
+        // Clear existing reminders and schedule fresh ones
         clearAllReminders(scheduledReminders);
-
-        // Schedule new reminders
         const newReminders = scheduleMedicationReminders(medications, handleReminderTrigger);
         setScheduledReminders(newReminders);
 
-        // Cleanup on unmount
-        return () => clearAllReminders(newReminders);
+        // Improvement #3: Re-evaluate reminders every hour so that
+        // the next day's doses get scheduled even if the tab stays open.
+        const hourlyReschedule = setInterval(() => {
+            clearAllReminders(newReminders);
+            const refreshed = scheduleMedicationReminders(medications, handleReminderTrigger);
+            setScheduledReminders(refreshed);
+        }, 60 * 60 * 1000); // every hour
+
+        return () => {
+            clearAllReminders(newReminders);
+            clearInterval(hourlyReschedule);
+        };
     }, [medications]);
 
     // Check for missed doses periodically
@@ -74,6 +78,8 @@ export function MedicationProvider({ children }) {
     function handleReminderTrigger(medication, time) {
         // This is called when a reminder notification is sent
         console.log(`Reminder triggered for ${medication.drugName} at ${time}`);
+        // Dispatch a custom event so App.jsx can react (e.g. navigate) without hash routing
+        window.dispatchEvent(new CustomEvent('medicationReminder', { detail: { medication, time } }));
     }
 
     function addMedication(medication) {

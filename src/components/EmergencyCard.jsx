@@ -5,7 +5,7 @@ import { useMedications } from '../context/MedicationContext';
 import { generateEmergencyQR } from '../utils/qrCode';
 import { generateEmergencyPDF, downloadPDF } from '../utils/emergencyPdf';
 
-export default function EmergencyCard({ onNavigate }) {
+export default function EmergencyCard({ onNavigate, patientName = 'Patient' }) {
     const {
         emergencyContacts,
         criticalMedications,
@@ -44,7 +44,7 @@ export default function EmergencyCard({ onNavigate }) {
 
     const handleDownloadPDF = async () => {
         try {
-            const doc = generateEmergencyPDF(emergencyData, qrCode, 'Patient');
+            const doc = generateEmergencyPDF(emergencyData, qrCode, patientName || 'Patient');
             downloadPDF(doc, `emergency_card_${new Date().toISOString().split('T')[0]}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -56,9 +56,10 @@ export default function EmergencyCard({ onNavigate }) {
         if (navigator.share) {
             try {
                 // Generate PDF as blob for sharing
-                const doc = generateEmergencyPDF(emergencyData, qrCode, 'Patient');
+                const doc = generateEmergencyPDF(emergencyData, qrCode, patientName || 'Patient');
                 const pdfBlob = doc.output('blob');
-                const file = new File([pdfBlob], 'emergency_card.pdf', { type: 'application/pdf' });
+                const safeName = (patientName || 'patient').toLowerCase().replace(/\s+/g, '_');
+                const file = new File([pdfBlob], `emergency_card_${safeName}.pdf`, { type: 'application/pdf' });
 
                 await navigator.share({
                     title: 'Emergency Medical Information',
@@ -109,7 +110,7 @@ export default function EmergencyCard({ onNavigate }) {
                     {/* Header */}
                     <div className="emergency-card-title">
                         <h1>⚠️ EMERGENCY MEDICAL INFO</h1>
-                        <p className="patient-name">PATIENT</p>
+                        <p className="patient-name">{patientName ? patientName.toUpperCase() : 'PATIENT'}</p>
                     </div>
 
                     {/* Critical Medications */}

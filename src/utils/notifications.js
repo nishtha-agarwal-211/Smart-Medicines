@@ -47,8 +47,9 @@ export function sendMedicationReminder(medication, time) {
     notification.onclick = () => {
         window.focus();
         notification.close();
-        // Navigate to medication confirmation page
-        window.location.hash = `#/confirm/${medication.id}`;
+        // Dispatch a custom event so App.jsx can navigate to the dashboard
+        // (app uses state-based routing, not hash routing)
+        window.dispatchEvent(new CustomEvent('navigateToView', { detail: { view: 'dashboard' } }));
     };
 
     return notification;
@@ -68,26 +69,38 @@ export function scheduleMedicationReminders(medications, onReminder) {
         }
 
         medication.schedule.forEach(time => {
-            const interval = calculateNextReminderInterval(time);
-
-            if (interval > 0) {
-                const timeoutId = setTimeout(() => {
-                    sendMedicationReminder(medication, time);
-                    if (onReminder) {
-                        onReminder(medication, time);
-                    }
-                }, interval);
-
-                scheduledReminders.push({
-                    medicationId: medication.id,
-                    time,
-                    timeoutId
-                });
+            const schedule = scheduleRecurringReminder(medication, time, onReminder, scheduledReminders);
+            if (schedule) {
+                scheduledReminders.push(schedule);
             }
         });
     });
 
     return scheduledReminders;
+}
+
+/**
+ * Schedule a recurring daily reminder for a single medication+time combo.
+ * After the first fire, reschedules itself for exactly 24 hours later.
+ */
+function scheduleRecurringReminder(medication, time, onReminder, remindersList) {
+    const interval = calculateNextReminderInterval(time);
+    if (interval <= 0) return null;
+
+    const entry = { medicationId: medication.id, time, timeoutId: null };
+
+    const fire = () => {
+        sendMedicationReminder(medication, time);
+        if (onReminder) onReminder(medication, time);
+        // Reschedule for the same time tomorrow (24 hours)
+        entry.timeoutId = setTimeout(fire, 24 * 60 * 60 * 1000);
+        // Update the reference in the list so clearAllReminders can find it
+        const idx = remindersList.findIndex(r => r === entry);
+        if (idx !== -1) remindersList[idx] = entry;
+    };
+
+    entry.timeoutId = setTimeout(fire, interval);
+    return entry;
 }
 
 /**

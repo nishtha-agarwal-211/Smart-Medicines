@@ -35,11 +35,32 @@ export default function PrescriptionScanner({ onNavigate }) {
                 setError('Could not extract medication information. Please try a clearer image.');
                 setStep('select');
             } else {
-                // Add preview URL to medications
-                const medsWithPreview = medications.map(med => ({
-                    ...med,
-                    prescriptionImage: previewUrl
-                }));
+                // Bug 3: Convert timing label strings ("morning", "evening") to HH:MM
+                // so that the notification scheduler can work correctly
+                const timingToHHMM = {
+                    morning:   '08:00',
+                    afternoon: '13:00',
+                    noon:      '12:00',
+                    evening:   '18:00',
+                    night:     '21:00',
+                    bedtime:   '22:00',
+                };
+
+                const medsWithPreview = medications.map(med => {
+                    // Build a proper schedule (HH:MM array) from the timing field
+                    const rawTiming = Array.isArray(med.timing) ? med.timing : [];
+                    const schedule = rawTiming
+                        .map(t => timingToHHMM[t.toLowerCase().trim()] || null)
+                        .filter(Boolean);
+
+                    return {
+                        ...med,
+                        prescriptionImage: previewUrl,
+                        // Normalise timing to labels; schedule to HH:MM
+                        timing: rawTiming,
+                        schedule: schedule.length > 0 ? schedule : ['08:00'], // default morning
+                    };
+                });
                 setExtractedMeds(medsWithPreview);
                 setStep('review');
             }

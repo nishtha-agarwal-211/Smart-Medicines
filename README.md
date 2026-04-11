@@ -1,215 +1,233 @@
 # 💊 Smart Medicine Companion
 
-**AI-powered healthcare assistant for medication management using Google Gemini**
+> **AI-powered medication management assistant built with React + Google Gemini**
 
-A hackathon-winning project that transforms medication management from passive reminders into an intelligent, conversational, and proactive care system.
+A personal project that transforms medication management from passive reminders into an intelligent, conversational, and proactive healthcare companion — designed with elderly patients in mind.
 
-## 🌟 Features
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)](https://vitejs.dev)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google)](https://ai.google.dev)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-- **📸 AI Prescription Scanner** - Upload prescription images and let Gemini Vision extract medication details
-- **💬 AI Health Chat** - Natural language Q&A about medications powered by Gemini
-- **⏰ Smart Reminders** - Browser notifications for medication schedules
-- **🧠 Missed Dose Advisor** - AI reasoning engine for handling missed doses
-- **💊 Medication Dashboard** - Track adherence and manage all medications
-- **🎯 Elderly-Friendly UX** - Large fonts, high contrast, simple navigation
+---
+
+## ✨ Features
+
+### 🤖 AI-Powered Core
+| Feature | Description |
+|---|---|
+| **📸 Prescription Scanner** | Upload a photo → Gemini Vision extracts drug name, dosage, frequency, warnings |
+| **💬 AI Health Chat** | Conversational Q&A with full medication + patient profile context |
+| **🧠 Missed Dose Advisor** | AI reasoning engine — suggests take/skip/call doctor based on timing |
+| **⚡ Drug Interaction Detector** | Scans all current medications for interactions (high/moderate/low severity) |
+
+### 📊 Medication Management
+| Feature | Description |
+|---|---|
+| **📋 7-Day Adherence Chart** | Visual bar chart of daily adherence with colour-coded severity |
+| **💊 Refill Tracker** | Per-medication pill counter with low-supply alerts (≤7 pills) |
+| **✏️ Edit Medications** | Full inline edit form — schedule, dosage, warnings, quantity |
+| **🗓 Today's Schedule** | Real-time dose status: pending / taken / missed |
+
+### 🚨 Emergency Features
+| Feature | Description |
+|---|---|
+| **🪪 Emergency Card** | Printable card with all critical info + QR code |
+| **📄 PDF Export** | One-tap PDF with name, blood type, meds, allergies, contacts |
+| **📱 Share API** | Share emergency card via native device share sheet |
+| **👤 User Profile** | Name, DOB, blood type, gender — auto-fills Emergency Card |
+
+### ⏰ Smart Reminders
+- Browser notifications at scheduled dose times
+- **Daily recurrence** — reminders self-reschedule every 24 hours
+- **Hourly re-evaluation** — keeps reminders alive during long sessions
+- Notification click navigates directly to the dashboard
+
+### 🎨 UX & Accessibility
+- **Dark mode** toggle (persisted across sessions)
+- **Voice input** — Mic button in chat uses Web Speech API
+- **Elderly-friendly** — 18px+ fonts, 48px+ touch targets, high contrast
+- Fully responsive (mobile-first)
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js 18+ and npm
-- Google Gemini API key ([Get one free](https://makersuite.google.com/app/apikey))
+- Google Gemini API key → [Get one free](https://makersuite.google.com/app/apikey)
 
-### Installation
+### Setup
 
-1. **Navigate to project directory**
-   ```bash
-   cd "/Users/nishtha/Desktop/DevForge/smart medicine"
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/smart-medicine.git
+cd smart-medicine
 
-2. **Install dependencies** (already done if you followed setup)
-   ```bash
-   npm install
-   ```
+# 2. Install dependencies
+npm install
 
-3. **Configure API Key**
-   
-   Create a `.env` file in the root directory:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and add your Gemini API key:
-   ```
-   VITE_GEMINI_API_KEY=your_actual_api_key_here
-   ```
+# 3. Configure API key
+cp .env.example .env
+# Edit .env and set: VITE_GEMINI_API_KEY=your_actual_key_here
 
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
+# 4. Start dev server
+npm run dev
+```
 
-5. **Open in browser**
-   
-   Visit `http://localhost:5173`
+Open `http://localhost:5173` in your browser.
 
-## 🎯 Core User Flows
+---
 
-### 1. Add First Medication
-1. Click "Scan Prescription" on dashboard
-2. Upload or capture prescription image
-3. AI extracts medication details
-4. Review and confirm
-5. Medication added to dashboard
+## 🛠 Tech Stack
 
-### 2. Get Medication Guidance
-1. Click "Ask AI" or "AI Assistant"
-2. Type your question (e.g., "Can I take ibuprofen with my meds?")
-3. Get instant, contextual AI response
+| Layer | Technology |
+|---|---|
+| **UI Framework** | React 19 + Vite 7 |
+| **AI** | Google Gemini 2.5 Flash (multimodal) |
+| **Styling** | Vanilla CSS with custom properties, split into component files |
+| **Icons** | Lucide React |
+| **PDF** | jsPDF |
+| **QR Code** | `qrcode` npm package |
+| **State** | React Context API + localStorage |
+| **Notifications** | Browser Notification API |
+| **Voice** | Web Speech API |
 
-### 3. Handle Missed Dose
-1. App detects missed dose
-2. Alert shown on dashboard
-3. Click "Get AI Guidance"
-4. Gemini analyzes and provides safe recommendation
-5. Follow AI advice (take now, skip, call doctor)
-
-## 🛠 Technology Stack
-
-### Frontend
-- **React 18** - UI framework
-- **Vite** - Build tool and dev server
-- **CSS Variables** - Healthcare color system
-- **Lucide React** - Icons
-
-### AI/ML
-- **Google Gemini 2.0 Flash** - Multimodal AI
-- **Vision API** - Prescription image analysis
-- **Text Generation** - Chat and reasoning
-
-### State Management
-- **React Context** - Global medication state
-- **LocalStorage** - Data persistence
-
-### Notifications
-- **Browser Notification API** - Medication reminders
+---
 
 ## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   ├── Dashboard.jsx              # Main dashboard with schedule
-│   ├── PrescriptionScanner.jsx    # AI prescription image analysis
-│   ├── ChatAssistant.jsx          # Gemini-powered chat
-│   ├── MissedDoseAdvisor.jsx      # AI missed dose reasoning
-│   └── MedicationList.jsx         # Medication management
-├── context/
-│   └── MedicationContext.jsx      # Global state management
-├── utils/
-│   ├── gemini.js                  # Gemini AI integration
-│   └── notifications.js           # Browser notifications
-├── styles/
-│   └── main.css                   # Healthcare-focused styling
-├── App.jsx                        # Main app component
-└── main.jsx                       # Entry point
+smart-medicine/
+├── .env.example               # API key template
+├── index.html
+├── vite.config.js
+│
+└── src/
+    ├── App.jsx                # Root router + providers + dark mode
+    ├── main.jsx
+    │
+    ├── components/            # 13 UI components
+    │   ├── Dashboard.jsx      # Stats, schedule, interactions, chart
+    │   ├── UserProfile.jsx    # Name, DOB, blood type, gender
+    │   ├── ChatAssistant.jsx  # AI chat + voice input
+    │   ├── ConfirmModal.jsx   # Reusable confirmation dialog
+    │   ├── MedicationList.jsx # View / edit / delete + refill tracker
+    │   ├── PrescriptionScanner.jsx
+    │   ├── ManualMedicationEntry.jsx
+    │   ├── MissedDoseAdvisor.jsx
+    │   ├── EmergencyProfile.jsx
+    │   ├── EmergencyCard.jsx
+    │   ├── EmergencyContactForm.jsx
+    │   ├── AllergyForm.jsx
+    │   └── MedicalConditionForm.jsx
+    │
+    ├── context/               # 3 global state providers
+    │   ├── UserProfileContext.jsx
+    │   ├── MedicationContext.jsx
+    │   └── EmergencyProfileContext.jsx
+    │
+    ├── utils/                 # Core logic
+    │   ├── gemini.js          # All Gemini AI calls
+    │   ├── notifications.js   # Scheduling + recurring reminders
+    │   ├── emergencyPdf.js    # PDF generation
+    │   └── qrCode.js          # QR encode/decode
+    │
+    └── styles/
+        ├── main.css           # @import index (entry point)
+        └── components/        # Per-component CSS files
+            ├── _variables.css
+            ├── _base.css
+            ├── buttons.css
+            ├── dashboard.css
+            ├── scanner.css
+            ├── chat.css
+            ├── missed-dose.css
+            ├── medication-list.css
+            ├── manual-entry.css
+            ├── emergency.css
+            └── app-overlays.css
 ```
-
-## 🎨 Design Principles
-
-- **Elderly-First**: Large 18px+ fonts, 48px+ touch targets, high contrast
-- **Trustworthy**: Medical blue (#0066CC), professional color palette
-- **Accessible**: WCAG AA compliant, keyboard navigation, reduced motion support
-- **Premium**: Subtle shadows, smooth transitions, modern glassmorphism
-
-## 🧪 Testing the App
-
-### Test Prescription Scanning
-1. Use a sample prescription image or create one
-2. Test with different image qualities
-3. Verify extracted medication details are accurate
-4. Confirm medications appear on dashboard
-
-### Test AI Chat
-1. Ask: "Can I take these medications together?"
-2. Ask: "What should I do if I miss a dose?"
-3. Test multilingual support (if configured)
-4. Verify responses are safe and helpful
-
-### Test Reminders
-1. Add a medication with a schedule 1 minute from now
-2. Grant notification permissions
-3. Wait for notification to appear
-4. Click notification and verify app interaction
-
-### Test Missed Dose Logic
-1. Set medication time in the past
-2. Refresh app
-3. Check for missed dose alert
-4. Click "Get AI Guidance"
-5. Verify AI provides contextual advice
-
-## 🔐 Privacy & Security
-
-- **Local-first**: All data stored in browser LocalStorage
-- **No backend**: Frontend-only for hackathon MVP
-- **API key security**: Configure via .env (never commit .env)
-- **HIPAA-ready**: Architecture designed for future compliance
-
-## 🏆 Hackathon Demo Tips
-
-1. **Setup Demo Data**: Pre-load 2-3 medications before presenting
-2. **Prepare Test Prescription**: Have a clear prescription image ready
-3. **Enable Notifications**: Grant permission before demo starts
-4. **Showcase AI**: Demo the chat with interesting questions
-5. **Highlight Missed Dose**: Show the AI reasoning in action
-
-## 📝 Future Enhancements
-
-- [ ] User authentication (Firebase/Auth0)
-- [ ] Backend API for scalability
-- [ ] Caregiver dashboard (multi-patient management)
-- [ ] WhatsApp integration
-- [ ] Wearable device sync (Apple Health, Fitbit)
-- [ ] Emergency 112 integration
-- [ ] Voice commands (Speech Recognition API)
-- [ ] PWA with offline mode
-
-## 🐛 Troubleshooting
-
-### API Key Error
-```
-⚠️ Gemini API key not found
-```
-**Solution**: Create `.env` file with `VITE_GEMINI_API_KEY=your_key`
-
-### Notifications Not Working
-**Solution**: Click "Allow" when browser asks for notification permission
-
-### Images Not Processing
-**Solution**: Check API key is valid and has Gemini Vision access
-
-### Port Already in Use
-**Solution**: Kill existing process or change port:
-```bash
-npm run dev -- --port 3000
-```
-
-## 📄 License
-
-MIT License - Built for educational and hackathon purposes
-
-## 🙏 Acknowledgments
-
-- **Google Gemini** - Multimodal AI platform
-- **React Team** - UI framework
-- **Vite Team** - Lightning-fast build tool
-- **Healthcare Community** - Inspiration for solving real problems
-
-## 👨‍💻 Author
-
-Built with ❤️ for improving healthcare accessibility
 
 ---
 
-**Note**: This is a hackathon MVP. For production use, implement proper backend, authentication, HIPAA compliance, and medical professional validation.
+## 🎯 Core User Flows
+
+### Add a Medication
+1. Dashboard → **Scan Prescription** or **Add Manually**
+2. AI extracts drug name, dosage, frequency, warnings from the image
+3. Review → Confirm → appears on dashboard with reminders scheduled
+
+### Get AI Guidance
+1. Click **Ask AI** or the chat button
+2. Ask in natural language: *"Can I take ibuprofen with my current meds?"*
+3. AI responds with full context of your medications and profile
+
+### Missed Dose
+1. App detects a missed dose (checked every 60 seconds)
+2. Alert banner appears → click **Get AI Guidance**
+3. Gemini reasons over the drug name, timing, and half-life
+4. Returns one of: *take now / skip / call doctor*
+
+### Emergency Card
+1. Fill out **User Profile** (name, DOB, blood type)
+2. Add contacts and allergies in **Emergency Profile**
+3. Open **Emergency Card** → Download as PDF or Share
+
+---
+
+## 🎨 Design System
+
+- **Primary blue** `#0066CC` — trust, medicine, reliability
+- **Success green** `#00A86B` — taken doses, good adherence
+- **Warning orange** `#FF8C00` — missed doses, interactions
+- **Dark mode** — full CSS variable override on `.app.dark`
+- **Typography** — system-ui stack, 18px base, 700 weight headings
+
+---
+
+## 🔐 Privacy & Security
+
+- **Local-first** — all data lives in the browser's `localStorage`
+- **No backend, no accounts** — nothing leaves your device
+- **API calls** — only the Gemini API is contacted (for AI features)
+- **Never commit `.env`** — the API key is kept out of version control
+
+> ⚠️ **Note:** For a production healthcare app, you would need a secure backend, end-to-end encryption, and HIPAA compliance. This is a personal/portfolio project.
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| `⚠️ Gemini API Key Required` banner | Create `.env` from `.env.example` and add your key |
+| Notifications not appearing | Click **Allow** when the browser prompts for permission |
+| Prescription scan returns no meds | Ensure image is clear and well-lit; verify API key has Gemini Vision access |
+| Dark mode not persisting | Clear localStorage (`localStorage.clear()` in browser console) and retry |
+| Port 5173 already in use | `npm run dev -- --port 3000` |
+
+---
+
+## 🔮 Future Improvements
+
+- [ ] **PWA / Service Worker** — true offline mode + background push notifications
+- [ ] **Authentication** — Firebase/Auth0 for multi-device sync
+- [ ] **Backend API** — secure storage + HIPAA-ready architecture
+- [ ] **Wearable sync** — Apple Health / Fitbit / Google Fit
+- [ ] **Multi-language** — i18n for non-English speaking elderly patients
+- [ ] **Caregiver dashboard** — manage multiple patient profiles
+- [ ] **WhatsApp / SMS alerts** — fallback when browser notifications fail
+- [ ] **CSS Modules** — migrate from single CSS bundle to scoped styles
+
+---
+
+## 👩‍💻 Author
+
+**Nishtha Agarwal**
+
+Built with ❤️ as a personal project exploring AI in healthcare accessibility.
+
+---
+
+*MIT License — built for learning and portfolio purposes.*

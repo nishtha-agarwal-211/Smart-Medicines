@@ -1,0 +1,250 @@
+/* === MISSED DOSE ADVISOR === */
+.missed-dose-container {
+  min-height: 100vh;
+  background: white;
+}
+
+.missed-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--gray-200);
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.missed-alert {
+  background: var(--warning-orange-light);
+  border: 2px solid var(--warning-orange);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+}
+
+.missed-alert svg {
+  color: var(--warning-orange);
+  flex-shrink: 0;
+}
+
+.missed-alert h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.missed-list {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.missed-card {
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.missed-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.missed-card-header h4 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.missed-card-header p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.missed-badge {
+  background: var(--danger-red);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.missed-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.detail-item svg {
+  color: var(--primary-blue);
+}
+
+.btn-ai-advice {
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: 48px;
+  transition: all 0.3s ease;
+}
+
+.btn-ai-advice:hover:not(:disabled) {
+  background: var(--primary-blue-dark);
+}
+
+.btn-ai-advice:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* === ADVICE CONTENT === */
+.advice-content {
+  padding: var(--spacing-lg);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.medication-info-card {
+  background: var(--primary-blue-light);
+  border: 2px solid var(--primary-blue);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.medication-info-card svg {
+  color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
+.medication-info-card h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.time-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  justify-content: center;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.ai-recommendation {
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 3px solid;
+}
+
+.recommendation-success {
+  background: var(--success-green-light);
+  border-color: var(--success-green);
+}
+
+.recommendation-warning {
+  background: var(--warning-orange-light);
+  border-color: var(--warning-orange);
+}
+
+.recommendation-danger {
+  background: var(--danger-red-light);
+  border-color: var(--danger-red);
+}
+
+.recommendation-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.recommendation-icon {
+  font-size: var(--font-size-3xl);
+}
+
+.recommendation-header h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.advice-section {
+  background: white;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.advice-section h4 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.advice-section p {
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.advice-highlight {
+  background: var(--primary-blue-light);
+  border-left: 4px solid var(--primary-blue);
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+

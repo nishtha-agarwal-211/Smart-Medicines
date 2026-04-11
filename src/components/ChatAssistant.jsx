@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Loader, Bot, User } from 'lucide-react';
 import { chatWithGemini } from '../utils/gemini';
 import { useMedications } from '../context/MedicationContext';
+import { useUserProfile } from '../context/UserProfileContext';
 
 export default function ChatAssistant({ onNavigate }) {
     const { medications } = useMedications();
+    const { profile } = useUserProfile();
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            content: '👋 Hi! I\'m your AI health assistant. I can help you with questions about your medications, side effects, drug interactions, and general health guidance. What would you like to know?'
+            content: '👋 Hi! I\'m your AI health assistant. I can help you with questions about your medications, side effects, drug interactions, and general health guidance. What would you like to know?',
+            timestamp: new Date().toISOString()
         }
     ]);
     const [input, setInput] = useState('');
@@ -29,27 +32,51 @@ export default function ChatAssistant({ onNavigate }) {
         const userMessage = input.trim();
         setInput('');
 
-        // Add user message
-        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        // Add user message with real timestamp
+        setMessages(prev => [...prev, { role: 'user', content: userMessage, timestamp: new Date().toISOString() }]);
         setLoading(true);
 
         try {
             // Get AI response
-            const response = await chatWithGemini(userMessage, medications);
+            const response = await chatWithGemini(userMessage, medications, profile);
 
-            // Add assistant message
-            setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+            // Add assistant message with real timestamp
+            setMessages(prev => [...prev, { role: 'assistant', content: response, timestamp: new Date().toISOString() }]);
         } catch (error) {
             setMessages(prev => [
                 ...prev,
                 {
                     role: 'assistant',
-                    content: '❌ Sorry, I encountered an error. Please try again or check your API key configuration.'
+                    content: '❌ Sorry, I encountered an error. Please try again or check your API key configuration.',
+                    timestamp: new Date().toISOString()
                 }
             ]);
         } finally {
             setLoading(false);
         }
+    };
+
+    const [listening, setListening] = useState(false);
+
+    const handleVoiceInput = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Voice input is not supported in this browser. Try Chrome or Edge.');
+            return;
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => setListening(true);
+        recognition.onend = () => setListening(false);
+        recognition.onerror = () => setListening(false);
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setInput(prev => (prev ? prev + ' ' + transcript : transcript));
+        };
+        recognition.start();
     };
 
     const handleKeyPress = (e) => {
@@ -104,7 +131,9 @@ export default function ChatAssistant({ onNavigate }) {
                                 {message.content}
                             </div>
                             <span className="message-time">
-                                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {message.timestamp
+                                    ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                    : ''}
                             </span>
                         </div>
                     </div>
@@ -156,6 +185,14 @@ export default function ChatAssistant({ onNavigate }) {
                     rows={1}
                     disabled={loading}
                 />
+                <button
+                    className={`btn-mic ${listening ? 'btn-mic-listening' : ''}`}
+                    onClick={handleVoiceInput}
+                    disabled={loading}
+                    title={listening ? 'Listening…' : 'Speak your question'}
+                >
+                    <Mic size={20} />
+                </button>
                 <button
                     className="btn-send"
                     onClick={handleSend}

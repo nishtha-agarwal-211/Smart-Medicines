@@ -7,19 +7,31 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output (don't commit compiled files)
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
+# Local env files — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# macOS junk
+.DS_Store
+**/.DS_Store
+
+# Editor directories
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
+
+# Vite
+*.local

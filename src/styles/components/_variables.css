@@ -1,0 +1,139 @@
+/* ===================================
+   SMART MEDICINE COMPANION - MAIN STYLES
+   Healthcare-focused, elderly-friendly design
+   =================================== */
+
+/* === CSS VARIABLES === */
+:root {
+  /* Healthcare Color Palette */
+  --primary-blue: #0066CC;
+  --primary-blue-dark: #004C99;
+  --primary-blue-light: #E6F0FF;
+
+  --success-green: #00A86B;
+  --success-green-light: #E6F7F0;
+
+  --warning-orange: #FF8C00;
+  --warning-orange-light: #FFF4E6;
+
+  --danger-red: #DC3545;
+  --danger-red-light: #FFE6E9;
+
+  --info-purple: #6C5CE7;
+  --info-purple-light: #F0EEFF;
+
+  /* Neutral Colors */
+  --gray-50: #F8F9FA;
+  --gray-100: #E9ECEF;
+  --gray-200: #DEE2E6;
+  --gray-300: #CED4DA;
+  --gray-600: #6C757D;
+  --gray-800: #343A40;
+  --gray-900: #212529;
+
+  /* Semantic Colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: var(--gray-50);
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+
+  /* Borders & Shadows */
+  --border-radius: 12px;
+  --border-radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Typography */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+}
+
+/* === RESET & BASE === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', sans-serif;
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === APP CONTAINER === */
+.app {
+  min-height: 100vh;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--bg-secondary);
+}
+
+/* === API KEY WARNING === */
+.api-key-warning {
+  background: linear-gradient(135deg, #FFF4E6 0%, #FFE6E9 100%);
+  border-bottom: 3px solid var(--warning-orange);
+  padding: var(--spacing-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.warning-icon {
+  font-size: var(--font-size-3xl);
+  flex-shrink: 0;
+}
+
+.warning-content strong {
+  display: block;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-xs);
+  color: var(--danger-red);
+}
+
+.warning-content p {
+  font-size: var(--font-size-sm);
+  color: var(--gray-800);
+  line-height: 1.5;
+}
+
+.warning-content code {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: var(--font-size-xs);
+}
+
+.warning-content a {
+  color: var(--primary-blue);
+  text-decoration: underline;
+  font-weight: 600;
+}

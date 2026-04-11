@@ -2,32 +2,26 @@ import React, { useState } from 'react';
 import { Phone, Mail, Edit2, Trash2, Plus, AlertTriangle, Heart, Droplet, Share2, Download } from 'lucide-react';
 import { useEmergencyProfile } from '../context/EmergencyProfileContext';
 import { useMedications } from '../context/MedicationContext';
+import { useUserProfile } from '../context/UserProfileContext';
 import EmergencyContactForm from './EmergencyContactForm';
 import AllergyForm from './AllergyForm';
 import MedicalConditionForm from './MedicalConditionForm';
+import ConfirmModal from './ConfirmModal';
 
 export default function EmergencyProfile({ onNavigate }) {
     const {
-        emergencyContacts,
-        criticalMedications,
-        allergies,
-        medicalConditions,
-        emergencyInfo,
-        addEmergencyContact,
-        updateEmergencyContact,
-        removeEmergencyContact,
-        setPrimaryContact,
-        markCriticalMedication,
-        addAllergy,
-        updateAllergy,
-        removeAllergy,
-        addMedicalCondition,
-        updateMedicalCondition,
-        removeMedicalCondition,
-        updateEmergencyInfo
+        emergencyContacts, allergies, medicalConditions,
+        criticalMedications, markCriticalMedication,
+        addEmergencyContact, updateEmergencyContact, removeEmergencyContact,
+        addAllergy, updateAllergy, removeAllergy,
+        addMedicalCondition, updateMedicalCondition, removeMedicalCondition,
+        emergencyInfo, updateEmergencyInfo
     } = useEmergencyProfile();
-
     const { medications } = useMedications();
+    const { profile } = useUserProfile();
+
+    // Pre-fill blood type from user profile if not already set in emergency info
+    const effectiveBloodType = emergencyInfo.bloodType || profile.bloodType || '';
 
     const [showContactForm, setShowContactForm] = useState(false);
     const [showAllergyForm, setShowAllergyForm] = useState(false);
@@ -35,6 +29,7 @@ export default function EmergencyProfile({ onNavigate }) {
     const [editingContact, setEditingContact] = useState(null);
     const [editingAllergy, setEditingAllergy] = useState(null);
     const [editingCondition, setEditingCondition] = useState(null);
+    const [confirmModal, setConfirmModal] = useState(null);
 
     const bloodTypeOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -62,10 +57,12 @@ export default function EmergencyProfile({ onNavigate }) {
         setShowContactForm(true);
     };
 
-    const handleDeleteContact = (id) => {
-        if (confirm('Are you sure you want to remove this emergency contact?')) {
-            removeEmergencyContact(id);
-        }
+    const handleDeleteContact = (id, name) => {
+        setConfirmModal({
+            title: 'Remove Contact?',
+            message: `"${name}" will be removed from your emergency contacts.`,
+            onConfirm: () => removeEmergencyContact(id),
+        });
     };
 
     // Handlers for Allergies
@@ -84,10 +81,12 @@ export default function EmergencyProfile({ onNavigate }) {
         setShowAllergyForm(true);
     };
 
-    const handleDeleteAllergy = (id) => {
-        if (confirm('Are you sure you want to remove this allergy?')) {
-            removeAllergy(id);
-        }
+    const handleDeleteAllergy = (id, name) => {
+        setConfirmModal({
+            title: 'Remove Allergy?',
+            message: `"${name}" will be removed from your allergy list.`,
+            onConfirm: () => removeAllergy(id),
+        });
     };
 
     // Handlers for Medical Conditions
@@ -106,10 +105,12 @@ export default function EmergencyProfile({ onNavigate }) {
         setShowConditionForm(true);
     };
 
-    const handleDeleteCondition = (id) => {
-        if (confirm('Are you sure you want to remove this condition?')) {
-            removeMedicalCondition(id);
-        }
+    const handleDeleteCondition = (id, name) => {
+        setConfirmModal({
+            title: 'Remove Condition?',
+            message: `"${name}" will be removed from your medical conditions.`,
+            onConfirm: () => removeMedicalCondition(id),
+        });
     };
 
     const getSeverityColor = (severity) => {
@@ -199,7 +200,7 @@ export default function EmergencyProfile({ onNavigate }) {
                                         </button>
                                         <button
                                             className="btn-icon btn-danger"
-                                            onClick={() => handleDeleteContact(contact.id)}
+                                            onClick={() => handleDeleteContact(contact.id, contact.name)}
                                             title="Delete"
                                         >
                                             <Trash2 size={18} />
@@ -288,7 +289,7 @@ export default function EmergencyProfile({ onNavigate }) {
                                         </button>
                                         <button
                                             className="btn-icon btn-danger"
-                                            onClick={() => handleDeleteAllergy(allergy.id)}
+                                            onClick={() => handleDeleteAllergy(allergy.id, allergy.allergen)}
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -345,7 +346,7 @@ export default function EmergencyProfile({ onNavigate }) {
                                         </button>
                                         <button
                                             className="btn-icon btn-danger"
-                                            onClick={() => handleDeleteCondition(condition.id)}
+                                            onClick={() => handleDeleteCondition(condition.id, condition.name)}
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -370,7 +371,7 @@ export default function EmergencyProfile({ onNavigate }) {
                             <select
                                 id="bloodType"
                                 className="form-select"
-                                value={emergencyInfo.bloodType || ''}
+                                value={effectiveBloodType}
                                 onChange={(e) => updateEmergencyInfo({ bloodType: e.target.value })}
                             >
                                 <option value="">Select blood type</option>
@@ -437,6 +438,16 @@ export default function EmergencyProfile({ onNavigate }) {
                         setShowConditionForm(false);
                         setEditingCondition(null);
                     }}
+                />
+            )}
+
+            {confirmModal && (
+                <ConfirmModal
+                    title={confirmModal.title}
+                    message={confirmModal.message}
+                    confirmLabel="Remove"
+                    onConfirm={confirmModal.onConfirm}
+                    onCancel={() => setConfirmModal(null)}
                 />
             )}
         </div>

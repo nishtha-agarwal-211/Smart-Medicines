@@ -79,9 +79,10 @@ Example format:
  * Chat with Gemini about medications and health queries
  * @param {string} message - User's question
  * @param {Array} medications - User's current medications for context
+ * @param {Object} userProfile - Optional user profile for personalised context
  * @returns {Promise<string>} AI response
  */
-export async function chatWithGemini(message, medications = []) {
+export async function chatWithGemini(message, medications = [], userProfile = {}) {
   if (!genAI) {
     throw new Error('Gemini API key is not configured');
   }
@@ -93,6 +94,18 @@ export async function chatWithGemini(message, medications = []) {
       ? `\n\nCurrent medications:\n${medications.map(m => `- ${m.drugName} ${m.dosage} (${m.frequency})`).join('\n')}`
       : '';
 
+    // Build patient context from profile
+    const age = userProfile.dob
+      ? Math.floor((Date.now() - new Date(userProfile.dob)) / (365.25 * 24 * 3600 * 1000))
+      : userProfile.age || null;
+
+    const patientContext = [
+      userProfile.name   ? `Patient name: ${userProfile.name}` : null,
+      age                ? `Age: ${age} years old` : null,
+      userProfile.gender ? `Gender: ${userProfile.gender}` : null,
+      userProfile.bloodType ? `Blood type: ${userProfile.bloodType}` : null,
+    ].filter(Boolean).join(', ');
+
     const prompt = `You are a helpful, empathetic healthcare AI assistant for medication management. 
 
 IMPORTANT SAFETY GUIDELINES:
@@ -100,7 +113,7 @@ IMPORTANT SAFETY GUIDELINES:
 - Never diagnose conditions or recommend prescription medications
 - Focus on medication adherence, general health education, and support
 - Be clear about drug interactions and safety concerns
-- Use simple, elderly-friendly language${medicationContext}
+- Use simple, elderly-friendly language${patientContext ? `\n\nPatient profile: ${patientContext}` : ''}${medicationContext}
 
 User question: ${message}
 
@@ -184,7 +197,7 @@ export async function detectDrugInteractions(medications) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const medList = medications.map(m => `${m.drugName} ${m.dosage}`).join(', ');
 
