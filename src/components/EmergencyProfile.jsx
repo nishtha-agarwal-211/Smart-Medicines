@@ -30,6 +30,7 @@ export default function EmergencyProfile({ onNavigate }) {
     const [editingAllergy, setEditingAllergy] = useState(null);
     const [editingCondition, setEditingCondition] = useState(null);
     const [confirmModal, setConfirmModal] = useState(null);
+    const [contactFormKey, setContactFormKey] = useState(0);
 
     const bloodTypeOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -54,6 +55,7 @@ export default function EmergencyProfile({ onNavigate }) {
 
     const handleEditContact = (contact) => {
         setEditingContact(contact);
+        setContactFormKey(k => k + 1);
         setShowContactForm(true);
     };
 
@@ -154,6 +156,7 @@ export default function EmergencyProfile({ onNavigate }) {
                             className="btn-primary btn-sm"
                             onClick={() => {
                                 setEditingContact(null);
+                                setContactFormKey(k => k + 1);
                                 setShowContactForm(true);
                             }}
                         >
@@ -410,6 +413,7 @@ export default function EmergencyProfile({ onNavigate }) {
             {/* Modals */}
             {showContactForm && (
                 <EmergencyContactForm
+                    key={contactFormKey}
                     contact={editingContact}
                     onSave={handleSaveContact}
                     onCancel={() => {

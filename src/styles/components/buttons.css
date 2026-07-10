@@ -1,72 +1,261 @@
-/* === BUTTONS === */
+/* ===================================================
+   BUTTONS — Premium Healthcare Button System
+   Stripe-inspired interactions with spring animations
+   =================================================== */
+
+/* === BASE BUTTON === */
 .btn-primary,
 .btn-secondary,
-.btn-danger {
+.btn-danger,
+.btn-success,
+.btn-ghost {
   border: none;
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  min-height: 48px;
-  box-shadow: var(--shadow-sm);
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  white-space: nowrap;
+  position: relative;
+  letter-spacing: -0.01em;
+  user-select: none;
 }
 
+/* === PRIMARY === */
 .btn-primary {
-  background: var(--primary-blue);
+  background: var(--primary);
   color: white;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2), 0 0 0 0 rgba(37, 99, 235, 0);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-blue-dark);
+  background: var(--primary-hover);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3), 0 0 0 0 rgba(37, 99, 235, 0);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
+.btn-primary:active:not(:disabled) {
+  background: var(--primary-active);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+
+/* === SECONDARY === */
 .btn-secondary {
-  background: white;
-  color: var(--gray-800);
-  border: 2px solid var(--gray-300);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-default);
 }
 
-.btn-secondary:hover {
-  border-color: var(--gray-600);
-  background: var(--gray-50);
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--slate-300);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-1);
 }
 
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  background: var(--slate-100);
+}
+
+/* === DANGER === */
 .btn-danger {
-  background: var(--danger-red);
+  background: var(--error);
   color: white;
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.2);
 }
 
-.btn-danger:hover {
-  background: #C82333;
+.btn-danger:hover:not(:disabled) {
+  background: var(--error-dark);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
 }
 
+.btn-danger:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* === SUCCESS === */
+.btn-success {
+  background: var(--success);
+  color: white;
+  box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--success-dark);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-success:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* === GHOST === */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-3);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* === DISABLED === */
 .btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.5;
+.btn-secondary:disabled,
+.btn-danger:disabled,
+.btn-success:disabled,
+.btn-ghost:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
+/* === SIZES === */
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-small);
+  min-height: 34px;
+  border-radius: var(--radius-md);
+}
+
+.btn-lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-body);
+  min-height: 50px;
+  border-radius: var(--radius-xl);
+}
+
+/* === BACK BUTTON === */
 .btn-back {
   background: transparent;
   border: none;
-  color: var(--primary-blue);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: var(--text-caption);
+  font-weight: var(--font-medium);
   cursor: pointer;
-  padding: var(--spacing-sm);
-  transition: all 0.3s ease;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .btn-back:hover {
-  color: var(--primary-blue-dark);
+  background: var(--bg-hover);
+  color: var(--text-primary);
   transform: translateX(-2px);
 }
 
+/* === ICON BUTTON === */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-icon:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.btn-icon.btn-danger {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.btn-icon.btn-danger:hover {
+  background: var(--error-light);
+  color: var(--error);
+  box-shadow: none;
+  transform: scale(1.05);
+}
+
+/* === LINK BUTTON === */
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: var(--text-caption);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.btn-link:hover {
+  color: var(--primary-hover);
+}
+
+/* === LOADING STATE === */
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.btn-loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: var(--radius-full);
+  animation: spin 0.6s linear infinite;
+  margin-left: var(--space-2);
+}
+
+/* === GRADIENT CTA === */
+.btn-gradient {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  background-size: 200% auto;
+}
+
+.btn-gradient:hover {
+  background-position: right center;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-gradient:active {
+  transform: translateY(0) scale(0.98);
+}

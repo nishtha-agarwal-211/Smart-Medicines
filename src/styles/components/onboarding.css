@@ -1,0 +1,196 @@
+/* ===================================================
+   ONBOARDING — Welcome Flow for First-Time Users
+   =================================================== */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--space-4);
+  animation: overlayFadeIn var(--transition-fast) ease;
+}
+
+.onboarding-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8) var(--space-6);
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-modal);
+  animation: modalSlideUp 0.4s var(--ease-spring);
+  overflow: hidden;
+}
+
+/* Gradient accent at top */
+.onboarding-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.onboarding-blue::before { background: var(--gradient-primary); }
+.onboarding-purple::before { background: var(--gradient-purple); }
+.onboarding-green::before { background: var(--gradient-success); }
+
+/* Skip button */
+.onboarding-skip {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-size: var(--text-small);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  padding: var(--space-1) var(--space-2);
+}
+
+.onboarding-skip:hover {
+  color: var(--text-primary);
+}
+
+/* Content */
+.onboarding-content {
+  animation: fadeIn 0.35s var(--ease-smooth);
+}
+
+.onboarding-icon-wrap {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-5);
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.onboarding-blue .onboarding-icon-wrap {
+  background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(59,130,246,0.15));
+}
+.onboarding-purple .onboarding-icon-wrap {
+  background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(99,102,241,0.15));
+}
+.onboarding-green .onboarding-icon-wrap {
+  background: linear-gradient(135deg, rgba(5,150,105,0.1), rgba(16,185,129,0.15));
+}
+
+.onboarding-emoji {
+  font-size: 36px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.onboarding-title {
+  font-size: var(--text-section-title);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-tight);
+}
+
+.onboarding-subtitle {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--primary);
+  margin-bottom: var(--space-3);
+}
+
+.onboarding-desc {
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  max-width: 340px;
+  margin: 0 auto var(--space-6);
+}
+
+/* Progress dots */
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--slate-200);
+  transition: all var(--transition-base);
+}
+
+.onboarding-dot.active {
+  width: 24px;
+  background: var(--primary);
+}
+
+.onboarding-dot.completed {
+  background: var(--primary-200);
+}
+
+/* Action button */
+.onboarding-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-8);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--text-body);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  min-height: 48px;
+}
+
+.onboarding-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.onboarding-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* === Dark Mode === */
+.app.dark .onboarding-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+}
+
+/* === Mobile === */
+@media (max-width: 480px) {
+  .onboarding-card {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .onboarding-title {
+    font-size: 22px;
+  }
+
+  .onboarding-icon-wrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .onboarding-emoji {
+    font-size: 28px;
+  }
+}

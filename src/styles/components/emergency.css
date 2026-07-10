@@ -1,747 +1,563 @@
-/* ===================================
-   EMERGENCY PROFILE STYLES
-   =================================== */
+/* ===================================================
+   EMERGENCY — Profile & Card Styles
+   Life-critical UI with premium healthcare design
+   =================================================== */
 
-/* Emergency Profile Container */
+/* === PROFILE CONTAINER === */
 .emergency-profile-container {
-    padding-bottom: 80px;
-}
-
-.emergency-instructions {
-    background: var(--warning-orange-light);
-    color: var(--warning-orange);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    margin: var(--spacing-lg) 0;
-    font-weight: 500;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .emergency-profile-content {
-    padding: 0 var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-/* Emergency Sections */
+.emergency-instructions {
+  font-size: var(--text-caption);
+  color: var(--warning-dark);
+  font-weight: var(--font-medium);
+  padding: var(--space-3) var(--space-5);
+  background: var(--warning-light);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-left: 4px solid var(--warning);
+  line-height: var(--leading-relaxed);
+}
+
+/* === SECTIONS === */
 .emergency-section {
-   background: var(--bg-primary);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  transition: box-shadow var(--transition-base);
 }
 
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
+.emergency-section:hover {
+  box-shadow: var(--elevation-1);
 }
 
-.section-header h3 {
-    font-size: 1.2rem;
-    color: var(--text-primary);
-    margin: 0;
+.emergency-section .section-header {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-light);
 }
 
-/* Emergency Contact Cards */
-.contact-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.contact-card {
-    border: 2px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-md);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    transition: all 0.2s;
-}
-
-.contact-card:hover {
-    border-color: var(--primary-blue);
-    box-shadow: var(--shadow-md);
-}
-
-.contact-info {
-    flex: 1;
-}
-
-.contact-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-}
-
-.contact-header h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.contact-relation {
-    background: var(--info-purple-light);
-    color: var(--info-purple);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.contact-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-}
-
-.detail-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    color: var(--text-secondary);
-}
-
-.detail-item a {
-    color: var(--primary-blue);
-    text-decoration: none;
-}
-
-.detail-item a:hover {
-    text-decoration: underline;
-}
-
-.contact-notes {
-    margin-top: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background: var(--gray-50);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.contact-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-}
-
-/* Allergy Cards */
-.allergy-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing-md);
-}
-
-.allergy-card {
-    border-radius: var(--border-radius);
-    padding: var(--spacing-md);
-    position: relative;
-    border: 2px solid;
-}
-
-.allergy-card.severity-severe {
-    background: var(--danger-red-light);
-    border-color: var(--danger-red);
-}
-
-.allergy-card.severity-moderate {
-    background: var(--warning-orange-light);
-    border-color: var(--warning-orange);
-}
-
-.allergy-card.severity-mild {
-    background: #FFF8E6;
-    border-color: #FFC107;
-}
-
-.allergy-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-}
-
-.allergy-header h4 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.severity-badge {
-    background: rgba(0, 0, 0, 0.1);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: bold;
-}
-
-.allergy-reaction {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.allergy-date {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-.allergy-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-}
-
-/* Condition Cards */
-.condition-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.condition-card {
-    border: 2px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-md);
-    position: relative;
-}
-
-.condition-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-}
-
-.condition-header h4 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.status-badge.status-active {
-    background: var(--danger-red-light);
-    color: var(--danger-red);
-}
-
-.status-badge.status-managed {
-    background: var(--warning-orange-light);
-    color: var(--warning-orange);
-}
-
-.status-badge.status-remission {
-    background: var(--success-green-light);
-    color: var(--success-green);
-}
-
-.condition-date, .condition-notes {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-top: var(--spacing-xs);
-}
-
-.condition-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-}
-
-/* Medication Checklist */
-.medication-checklist {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.checkbox-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    border: 2px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.checkbox-card:hover {
-    border-color: var(--primary-blue);
-    background: var(--primary-blue-light);
-}
-
-.checkbox-card input[type="checkbox"] {
-    margin-top: 4px;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-
-.checkbox-card-content {
-    flex: 1;
-}
-
-.checkbox-card-content h4 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-}
-
-.checkbox-card-content p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.warning-badge {
-    display: inline-block;
-    background: var(--warning-orange-light);
-    color: var(--warning-orange);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    margin-top: 4px;
-}
-
-/* Emergency Info Form */
-.emergency-info-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-
-/* Emergency Card Display */
-.emergency-card-container {
-    min-height: 100vh;
-    background: var(--gray-50);
-}
-
-.emergency-card-header {
-    background: var(--bg-primary);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.emergency-card-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.emergency-card-wrapper {
-    display: flex;
-    justify-content: center;
-    padding: var(--spacing-xl);
-}
-
-.emergency-card {
-    max-width: 800px;
-    width: 100%;
-    background: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-}
-
-.emergency-card-title {
-    background: linear-gradient(135deg, var(--danger-red) 0%, #A02030 100%);
-    color: white;
-    padding: var(--spacing-xl);
-    text-align: center;
-}
-
-.emergency-card-title h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.patient-name {
-    margin: var(--spacing-sm) 0 0 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.emergency-card-section {
-    padding: var(--spacing-lg);
-    border-bottom: 2px solid var(--gray-200);
-}
-
-.emergency-card-section:last-of-type {
-    border-bottom: none;
-}
-
-.section-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin: 0 0 var(--spacing-md) 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.section-title.critical {
-    color: var(--danger-red);
-}
-
-.section-title.allergies {
-    color: var(--warning-orange);
-}
-
-.section-title.conditions {
-    color: var(--info-purple);
-}
-
-.emergency-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.emergency-list li {
-    padding: var(--spacing-md);
-    background: var(--gray-50);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-sm);
-}
-
-.emergency-list li:last-child {
-    margin-bottom: 0;
-}
-
-.emergency-list strong {
-    font-size: 1.1rem;
-    color: var(--text-primary);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.med-details, .allergy-reaction, .condition-note {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-top: 4px;
-}
-
-.med-warnings {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-}
-
-.warning-pill {
-    background: var(--warning-orange-light);
-    color: var(--warning-orange);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-}
-
-.severity-pill {
-    display: inline-block;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-left: var(--spacing-sm);
-}
-
-.status-pill {
-    display: inline-block;
-    background: var(--gray-200);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    margin-left: var(--spacing-sm);
-}
-
-.info-item {
-    font-size: 1.1rem;
-    padding: var(--spacing-sm) 0;
-}
-
-.info-item strong {
-    color: var(--text-primary);
-}
-
-.emergency-notes {
-    background: var(--gray-50);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.contact-list li {
-    background: var(--primary-blue-light);
-}
-
-.primary-badge {
-    background: #FFD700;
-    color: #856404;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-left: var(--spacing-sm);
-}
-
-.contact-phone, .contact-email {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-top: 4px;
-}
-
-.emergency-card-qr {
-    padding: var(--spacing-xl);
-    text-align: center;
-    background: var(--gray-50);
-}
-
-.emergency-card-qr img {
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-    margin-bottom: var(--spacing-md);
-}
-
-.emergency-card-qr p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-style: italic;
-}
-
-.emergency-card-footer {
-    text-align: center;
-    padding: var(--spacing-lg);
-    background: var(--gray-50);
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.emergency-card-footer p {
-    margin: 4px 0;
-}
-
-/* Modal Styles for Forms */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: var(--spacing-lg);
-}
-
-.modal-content {
-    background: white;
-    border-radius: var(--border-radius-lg);
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.modal-header h2 {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin: 0;
-    font-size: 1.4rem;
-}
-
-.btn-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--spacing-xs);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.btn-close:hover {
-    background: var(--gray-100);
-}
-
-.modal-form {
-    padding: var(--spacing-lg);
-}
-
-.input-with-icon {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-with-icon svg {
-    position: absolute;
-    left: var(--spacing-md);
-    color: var(--text-secondary);
-}
-
-.input-with-icon input {
-    padding-left: 48px;
-}
-
-.severity-selector {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.severity-btn {
-    flex: 1;
-    padding: var(--spacing-md);
-    border: 2px solid;
-    background: white;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.severity-btn.severity-danger {
-    border-color: var(--danger-red);
-    color: var(--danger-red);
-}
-
-.severity-btn.severity-danger.active {
-    background: var(--danger-red);
-    color: white;
-}
-
-.severity-btn.severity-warning {
-    border-color: var(--warning-orange);
-    color: var(--warning-orange);
-}
-
-.severity-btn.severity-warning.active {
-    background: var(--warning-orange);
-    color: white;
-}
-
-.severity-btn.severity-info {
-    border-color: #FFC107;
-    color: #856404;
-}
-
-.severity-btn.severity-info.active {
-    background: #FFC107;
-    color: #856404;
-}
-
-/* Additional Button Styles */
-.btn-sm {
-    padding: var(--spacing-xs) var(--spacing-md);
-    font-size: 0.9rem;
-}
-
-.btn-icon {
-    background: none;
-    border: none;
-    padding: var(--spacing-xs);
-    border-radius: 50%;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-icon:hover {
-    background: var(--gray-100);
-    color: var(--text-primary);
-}
-
-.btn-icon.btn-danger:hover {
-    background: var(--danger-red-light);
-    color: var(--danger-red);
+.emergency-section .section-header h3 {
+  font-size: var(--text-card-title);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
 }
 
 .empty-state-small {
-    text-align: center;
-    padding: var(--spacing-xl);
-    color: var(--text-secondary);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  background: var(--bg-app);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-default);
 }
 
-.empty-state-small p {
-    margin-bottom: var(--spacing-md);
+/* === CONTACT LIST === */
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
-/* Action Button Danger Variant */
-.action-btn.action-danger {
-    background: var(--danger-red-light);
-    color: var(--danger-red);
+.contact-card {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-app);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-fast);
 }
 
-.action-btn.action-danger:hover {
-    background: var(--danger-red);
-    color: white;
+.contact-card:hover {
+  border-color: var(--border-default);
+  box-shadow: var(--elevation-1);
+  transform: translateX(2px);
 }
 
-/* Responsive Design */
+.contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.contact-header h4 {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.contact-relation {
+  font-size: var(--text-tiny);
+  color: var(--text-muted);
+  background: var(--slate-100);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.contact-details .detail-item a {
+  color: var(--primary);
+  font-size: var(--text-small);
+}
+
+.contact-notes {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.contact-actions {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* === MEDICATION CHECKLIST === */
+.medication-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.checkbox-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-app);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.checkbox-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(2px);
+}
+
+.checkbox-card input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.checkbox-card-content h4 {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.checkbox-card-content p {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.warning-badge {
+  display: inline-flex;
+  font-size: var(--text-tiny);
+  color: var(--warning-dark);
+  background: var(--warning-light);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+  margin-top: var(--space-1);
+}
+
+/* === ALLERGY LIST === */
+.allergy-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.allergy-card {
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-app);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--slate-300);
+  transition: all var(--transition-fast);
+}
+
+.allergy-card:hover {
+  box-shadow: var(--elevation-1);
+  transform: translateX(2px);
+}
+
+.severity-severe { border-left-color: var(--error); }
+.severity-moderate { border-left-color: var(--warning); }
+.severity-mild { border-left-color: var(--primary); }
+
+.allergy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.allergy-header h4 {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.severity-badge {
+  font-size: var(--text-micro);
+  font-weight: var(--font-bold);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+  background: var(--slate-100);
+  color: var(--text-secondary);
+}
+
+.severity-severe .severity-badge { background: var(--error-light); color: var(--error-dark); }
+.severity-moderate .severity-badge { background: var(--warning-light); color: var(--warning-dark); }
+.severity-mild .severity-badge { background: var(--primary-light); color: var(--primary); }
+
+.allergy-reaction {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+}
+
+.allergy-date {
+  font-size: var(--text-tiny);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.allergy-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-light);
+}
+
+/* === CONDITION LIST === */
+.condition-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.condition-card {
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-app);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-fast);
+}
+
+.condition-card:hover {
+  box-shadow: var(--elevation-1);
+  transform: translateX(2px);
+}
+
+.condition-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.condition-header h4 {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.status-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-micro);
+  font-weight: var(--font-bold);
+  text-transform: capitalize;
+}
+
+.status-active { background: var(--success-light); color: var(--success-dark); }
+.status-managed { background: var(--primary-light); color: var(--primary); }
+.status-remission { background: var(--slate-100); color: var(--text-secondary); }
+
+.condition-date {
+  font-size: var(--text-tiny);
+  color: var(--text-muted);
+}
+
+.condition-notes {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+.condition-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-light);
+}
+
+/* === EMERGENCY INFO FORM === */
+.emergency-info-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* === EMERGENCY CARD === */
+.emergency-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.emergency-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.emergency-card-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.emergency-card-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+
+.emergency-card {
+  background: var(--bg-surface);
+  border: 2px solid var(--error);
+  border-radius: var(--radius-2xl);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: var(--elevation-3);
+}
+
+.emergency-card-title {
+  background: var(--gradient-danger);
+  color: white;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.emergency-card-title h1 {
+  font-size: var(--text-card-title);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+}
+
+.patient-name {
+  font-size: var(--text-section-title);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.03em;
+}
+
+.emergency-card-section {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.emergency-card-section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: var(--text-small);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.section-title.critical { color: var(--error); }
+.section-title.allergies { color: var(--warning); }
+.section-title.conditions { color: var(--primary); }
+
+.emergency-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emergency-list li {
+  font-size: var(--text-caption);
+  color: var(--text-primary);
+  line-height: var(--leading-relaxed);
+}
+
+.emergency-list li strong {
+  font-weight: var(--font-semibold);
+}
+
+.emergency-list .med-details,
+.emergency-list .allergy-reaction,
+.emergency-list .condition-note {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.emergency-list .med-warnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.warning-pill {
+  font-size: var(--text-micro);
+  background: var(--warning-light);
+  color: var(--warning-dark);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+}
+
+.severity-pill {
+  font-size: var(--text-micro);
+  font-weight: var(--font-bold);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  color: white;
+  letter-spacing: 0.03em;
+}
+
+.status-pill {
+  font-size: var(--text-micro);
+  background: var(--slate-100);
+  color: var(--text-secondary);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  font-weight: var(--font-medium);
+  text-transform: capitalize;
+}
+
+.primary-badge {
+  font-size: var(--text-micro);
+  background: var(--warning-light);
+  color: var(--warning-dark);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  font-weight: var(--font-bold);
+}
+
+.contact-phone,
+.contact-email {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.info-item {
+  font-size: var(--text-caption);
+  color: var(--text-primary);
+  padding: var(--space-2) 0;
+}
+
+.info-item strong {
+  font-weight: var(--font-semibold);
+  margin-right: var(--space-2);
+}
+
+.emergency-notes {
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* === QR CODE === */
+.emergency-card-qr {
+  text-align: center;
+  padding: var(--space-5);
+  background: var(--bg-app);
+}
+
+.emergency-card-qr img {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  padding: var(--space-2);
+  background: white;
+}
+
+.emergency-card-qr p {
+  font-size: var(--text-tiny);
+  color: var(--text-muted);
+}
+
+/* === FOOTER === */
+.emergency-card-footer {
+  background: var(--bg-app);
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  font-size: var(--text-tiny);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+.emergency-card-footer p {
+  margin: 2px 0;
+}
+
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
-    .allergy-list {
-        grid-template-columns: 1fr;
-    }
-    
-    .emergency-card-wrapper {
-        padding: var(--spacing-md);
-    }
-    
-    .emergency-card-title h1 {
-        font-size: 1.5rem;
-    }
-    
-    .section-title {
-        font-size: 1.1rem;
-    }
-    
-    .modal-content {
-        margin: var(--spacing-md);
-    }
-}
+  .emergency-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-@media print {
-    .emergency-card-header,
-    .btn-back {
-        display: none;
-    }
-    
-    .emergency-card {
-        box-shadow: none;
-        max-width: none;
-    }
-}
+  .emergency-section {
+    padding: var(--space-4);
+  }
 
+  .contact-card {
+    padding: var(--space-3) var(--space-4);
+  }
+}

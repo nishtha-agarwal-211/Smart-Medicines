@@ -1,185 +1,473 @@
-/* === MEDICATION LIST === */
+/* ===================================================
+   MEDICATION LIST — Premium Medicine Cards
+   =================================================== */
+
+/* === CONTAINER === */
 .medications-container {
-  min-height: 100vh;
-  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
 .medications-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg);
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: var(--shadow-sm);
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
-.btn-add {
-  background: var(--primary-blue);
-  color: white;
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius);
-  font-size: var(--font-size-base);
-  font-weight: 600;
+.medications-header h2 {
+  font-size: var(--text-section-title);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.header-btn-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-add,
+.btn-scan {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-small);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
+  min-height: 36px;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
 }
 
-.btn-add:hover {
-  background: var(--primary-blue-dark);
+.btn-add:hover,
+.btn-scan:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-1);
 }
 
+/* === MEDICATION LIST === */
 .medications-list {
-  padding: var(--spacing-lg);
-  max-width: 900px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--space-3);
 }
 
+/* === MEDICATION CARD — Premium with Time-of-Day Colors === */
 .medication-card {
-  background: white;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  border: 1px solid var(--gray-200);
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
+  animation: fadeIn 0.3s var(--ease-smooth) backwards;
+  position: relative;
 }
+
+.medication-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.medication-card.time-morning::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+.medication-card.time-afternoon::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.medication-card.time-evening::before { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+.medication-card.time-night::before { background: linear-gradient(90deg, #4338CA, #6366F1); }
+.medication-card.time-default::before { background: var(--gradient-primary); }
 
 .medication-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--elevation-2);
+  transform: translateY(-1px);
+}
+
+.medication-card-low {
+  border-left: 4px solid var(--warning);
 }
 
 .medication-card-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background var(--transition-fast);
 }
 
 .medication-card-header:hover {
-  background: var(--gray-50);
+  background: var(--bg-hover);
 }
 
 .medication-icon {
-  font-size: var(--font-size-3xl);
+  font-size: 22px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  border-radius: var(--radius-lg);
   flex-shrink: 0;
+  transition: transform var(--transition-base);
+}
+
+.medication-icon-time-morning { background: rgba(245, 158, 11, 0.12); }
+.medication-icon-time-afternoon { background: rgba(59, 130, 246, 0.12); }
+.medication-icon-time-evening { background: rgba(139, 92, 246, 0.12); }
+.medication-icon-time-night { background: rgba(67, 56, 202, 0.12); }
+
+.medication-card-header:hover .medication-icon {
+  transform: scale(1.08);
 }
 
 .medication-title {
   flex: 1;
+  min-width: 0;
 }
 
 .medication-title h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--gray-900);
+  font-size: var(--text-body);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
   margin-bottom: 2px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .medication-title p {
-  font-size: var(--font-size-sm);
+  font-size: var(--text-small);
   color: var(--text-secondary);
 }
 
-.expand-btn {
-  background: transparent;
-  border: none;
-  color: var(--gray-600);
-  font-size: var(--font-size-lg);
-  cursor: pointer;
-  padding: var(--spacing-xs);
+.medication-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  flex-wrap: wrap;
 }
 
+.next-dose-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-tiny);
+  font-weight: var(--font-semibold);
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.refill-alert {
+  display: inline-flex;
+  font-size: var(--text-tiny);
+  color: var(--warning-dark);
+  font-weight: var(--font-semibold);
+  animation: pulse 2s ease infinite;
+}
+
+/* Supply mini bar (in header) */
+.supply-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.supply-mini-bar {
+  width: 40px;
+  height: 4px;
+  background: var(--slate-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.supply-mini-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.5s var(--ease-smooth);
+}
+
+.supply-ok { background: var(--success); }
+.supply-mid { background: var(--warning); }
+.supply-low { background: var(--error); }
+
+.supply-mini-label {
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  color: var(--text-muted);
+}
+
+.expand-btn {
+  color: var(--text-muted);
+  font-size: var(--text-tiny);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+/* === MEDICATION CARD BODY (Expanded) === */
 .medication-card-body {
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
-  border-top: 1px solid var(--gray-100);
+  padding: 0 var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: fadeIn 0.25s var(--ease-smooth);
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--space-4);
 }
 
 .medication-detail {
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--gray-100);
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-app);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-caption);
+  transition: background var(--transition-fast);
 }
 
-.medication-detail:last-of-type {
-  border-bottom: none;
+.medication-detail:hover {
+  background: var(--bg-hover);
 }
 
 .medication-detail svg,
-.medication-detail>span:first-child {
-  color: var(--primary-blue);
+.medication-detail span:first-child {
+  color: var(--text-muted);
   flex-shrink: 0;
-  width: 24px;
+  margin-top: 1px;
 }
 
 .medication-detail strong {
   display: block;
-  font-weight: 600;
-  color: var(--gray-900);
+  font-size: var(--text-small);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
   margin-bottom: 2px;
 }
 
-.medication-detail p,
+.medication-detail p {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+}
+
 .medication-detail ul {
-  font-size: var(--font-size-sm);
-  color: var(--gray-700);
-  margin: 0;
+  margin-top: var(--space-1);
+}
+
+.medication-detail li {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  padding-left: var(--space-3);
+  position: relative;
+  margin-bottom: var(--space-1);
+}
+
+.medication-detail li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
 }
 
 .medication-warning {
-  background: var(--warning-orange-light);
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius);
-  margin: var(--spacing-xs) 0;
+  background: var(--warning-light);
+  border-left: 3px solid var(--warning);
 }
 
-.medication-detail ul {
-  padding-left: var(--spacing-md);
+/* === REFILL TRACKER === */
+.refill-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-app);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
 }
 
+.refill-tracker-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.refill-label {
+  font-size: var(--text-small);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.supply-bar {
+  flex: 1;
+  max-width: 120px;
+  height: 6px;
+  background: var(--slate-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.supply-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s var(--ease-smooth);
+}
+
+.refill-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.refill-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--text-small);
+  font-weight: var(--font-semibold);
+}
+
+.refill-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.refill-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.refill-btn-refill {
+  width: auto;
+  padding: 0 var(--space-3);
+  background: var(--success-light);
+  color: var(--success-dark);
+  border-color: var(--success);
+  font-weight: var(--font-bold);
+}
+
+.refill-btn-refill:hover {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+.refill-count {
+  font-size: var(--text-body);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  min-width: 36px;
+  text-align: center;
+}
+
+.refill-low {
+  color: var(--warning);
+}
+
+/* AI Badge */
 .ai-badge {
-  margin: var(--spacing-md) 0;
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: var(--info-purple-light);
-  color: var(--info-purple);
-  border-radius: var(--border-radius);
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--gradient-primary);
+  color: white;
+  font-size: var(--text-tiny);
+  font-weight: var(--font-semibold);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
 }
 
+/* === MEDICATION ACTIONS === */
 .medication-actions {
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--gray-100);
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-light);
+}
+
+.btn-edit,
+.btn-delete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-small);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  min-height: 38px;
+}
+
+.btn-edit {
+  color: var(--primary);
+}
+
+.btn-edit:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .btn-delete {
-  background: transparent;
-  border: 1px solid var(--danger-red);
-  color: var(--danger-red);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  transition: all 0.3s ease;
+  color: var(--error);
 }
 
 .btn-delete:hover {
-  background: var(--danger-red);
-  color: white;
+  background: var(--error-light);
+  border-color: var(--error);
+  transform: translateY(-1px);
 }
 
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .medications-header {
+    gap: var(--space-2);
+  }
+
+  .medication-card-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .medication-card-body {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .medication-actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    flex: 1;
+    justify-content: center;
+  }
+}

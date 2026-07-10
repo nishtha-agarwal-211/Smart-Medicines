@@ -1,8 +1,58 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Loader, Bot, User } from 'lucide-react';
+import { Send, Mic, Bot, User, Trash2 } from 'lucide-react';
 import { chatWithGemini } from '../utils/gemini';
 import { useMedications } from '../context/MedicationContext';
 import { useUserProfile } from '../context/UserProfileContext';
+
+// ── Simple markdown renderer ─────────────────────────────────────────────────
+function renderMarkdown(text) {
+    if (!text) return '';
+
+    let html = text
+        // Escape HTML entities
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // Bold: **text** or __text__
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        // Italic: *text* or _text_
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/_(.*?)_/g, '<em>$1</em>')
+        // Inline code: `code`
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // Headings: ### text
+        .replace(/^### (.+)$/gm, '<h4 class="md-h4">$1</h4>')
+        .replace(/^## (.+)$/gm, '<h3 class="md-h3">$1</h3>')
+        .replace(/^# (.+)$/gm, '<h2 class="md-h2">$1</h2>')
+        // Unordered lists: - item or * item
+        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+        // Numbered lists: 1. item
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br/>');
+
+    // Wrap consecutive <li> in <ul>
+    html = html.replace(/(<li>.*?<\/li>)/gs, (match) => {
+        return '<ul class="md-list">' + match + '</ul>';
+    });
+    // Fix nested <ul>
+    html = html.replace(/<\/ul>\s*<ul class="md-list">/g, '');
+
+    return '<p>' + html + '</p>';
+}
+
+// ── Typing dots animation ────────────────────────────────────────────────────
+function TypingDots() {
+    return (
+        <div className="typing-dots">
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+        </div>
+    );
+}
 
 export default function ChatAssistant({ onNavigate }) {
     const { medications } = useMedications();
@@ -26,10 +76,10 @@ export default function ChatAssistant({ onNavigate }) {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = async () => {
-        if (!input.trim() || loading) return;
+    const handleSend = async (messageOverride) => {
+        const userMessage = (messageOverride || input).trim();
+        if (!userMessage || loading) return;
 
-        const userMessage = input.trim();
         setInput('');
 
         // Add user message with real timestamp
@@ -86,6 +136,16 @@ export default function ChatAssistant({ onNavigate }) {
         }
     };
 
+    const handleClearChat = () => {
+        setMessages([
+            {
+                role: 'assistant',
+                content: '👋 Chat cleared! How can I help you?',
+                timestamp: new Date().toISOString()
+            }
+        ]);
+    };
+
     const quickQuestions = medications.length > 0 ? [
         'Can I take these medications together?',
         'What should I do if I miss a dose?',
@@ -97,8 +157,9 @@ export default function ChatAssistant({ onNavigate }) {
         'Tips for remembering medications?'
     ];
 
+    // Auto-send quick questions
     const handleQuickQuestion = (question) => {
-        setInput(question);
+        handleSend(question);
     };
 
     return (
@@ -114,6 +175,16 @@ export default function ChatAssistant({ onNavigate }) {
                         <p className="chat-subtitle">Powered by Google Gemini</p>
                     </div>
                 </div>
+                {messages.length > 1 && (
+                    <button
+                        className="btn-clear-chat"
+                        onClick={handleClearChat}
+                        title="Clear chat history"
+                    >
+                        <Trash2 size={16} />
+                        <span>Clear</span>
+                    </button>
+                )}
             </header>
 
             <div className="chat-messages">
@@ -128,7 +199,14 @@ export default function ChatAssistant({ onNavigate }) {
                         </div>
                         <div className="message-content">
                             <div className="message-bubble">
-                                {message.content}
+                                {message.role === 'assistant' ? (
+                                    <div
+                                        className="md-content"
+                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+                                    />
+                                ) : (
+                                    message.content
+                                )}
                             </div>
                             <span className="message-time">
                                 {message.timestamp
@@ -146,8 +224,7 @@ export default function ChatAssistant({ onNavigate }) {
                         </div>
                         <div className="message-content">
                             <div className="message-bubble typing-indicator">
-                                <Loader size={16} className="spinner" />
-                                <span>AI is thinking...</span>
+                                <TypingDots />
                             </div>
                         </div>
                     </div>
@@ -159,7 +236,7 @@ export default function ChatAssistant({ onNavigate }) {
             {/* Quick Questions */}
             {messages.length === 1 && (
                 <div className="quick-questions">
-                    <p className="quick-questions-label">Quick questions:</p>
+                    <p className="quick-questions-label">Try asking:</p>
                     <div className="quick-questions-grid">
                         {quickQuestions.map((question, index) => (
                             <button
@@ -195,7 +272,7 @@ export default function ChatAssistant({ onNavigate }) {
                 </button>
                 <button
                     className="btn-send"
-                    onClick={handleSend}
+                    onClick={() => handleSend()}
                     disabled={!input.trim() || loading}
                 >
                     <Send size={20} />

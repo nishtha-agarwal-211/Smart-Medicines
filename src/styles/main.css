@@ -2,39 +2,48 @@
    SMART MEDICINE COMPANION — CSS Index
    All styles are split into component files below.
    Import order matters: variables first, then base,
-   then components, then overlays (highest specificity).
+   then layout, then components, then overlays.
    ===================================================== */
 
 /* 1. Design tokens & CSS custom properties */
 @import './components/_variables.css';
 
-/* 2. Reset, app shell, empty state, responsive, animations */
+/* 2. Reset, base styles, forms, animations, accessibility */
 @import './components/_base.css';
 
 /* 3. Shared buttons */
 @import './components/buttons.css';
 
-/* 4. Dashboard (stats, schedule, quick actions, alerts, interactions) */
+/* 4. Application shell (sidebar, topbar, bottom nav, toast) */
+@import './components/app-layout.css';
+
+/* 5. Dashboard (stats, schedule, quick actions, alerts, interactions) */
 @import './components/dashboard.css';
 
-/* 5. Prescription Scanner */
+/* 6. Prescription Scanner */
 @import './components/scanner.css';
 
-/* 6. Chat Assistant */
+/* 7. Chat Assistant */
 @import './components/chat.css';
 
-/* 7. Missed Dose Advisor */
+/* 8. Missed Dose Advisor */
 @import './components/missed-dose.css';
 
-/* 8. Medication List (view, edit, refill tracker) */
+/* 9. Medication List (view, edit, refill tracker) */
 @import './components/medication-list.css';
 
-/* 9. Manual Medication Entry form */
+/* 10. Manual Medication Entry form */
 @import './components/manual-entry.css';
 
-/* 10. Emergency Profile & Emergency Card */
+/* 11. Emergency Profile & Emergency Card */
 @import './components/emergency.css';
 
-/* 11. App-level overlays: name modal, dark mode, confirm modal,
-       adherence chart, refill tracker, voice mic, profile screen */
+/* 12. App-level overlays: dark mode, confirm modal,
+       adherence chart, refill tracker, voice mic, profile */
 @import './components/app-overlays.css';
+
+/* 13. Onboarding welcome flow */
+@import './components/onboarding.css';
+
+/* 14. Notification panel */
+@import './components/notifications-panel.css';

@@ -105,6 +105,14 @@ export function MedicationProvider({ children }) {
     }
 
     function logAdherence(medicationId, scheduledTime, status, actualTime = null) {
+        // Prevent duplicate logs for the same medication and scheduled time
+        const alreadyLogged = adherenceLogs.some(
+            existing =>
+                existing.medicationId === medicationId &&
+                existing.scheduledTime === scheduledTime
+        );
+        if (alreadyLogged) return null;
+
         const log = {
             id: generateId(),
             medicationId,

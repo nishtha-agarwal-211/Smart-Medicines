@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMedications } from '../context/MedicationContext';
 import { Pill, Edit2, Trash2, Clock, AlertTriangle, Plus, CheckCircle, X, Minus } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
@@ -91,6 +91,7 @@ export default function MedicationList({ onNavigate }) {
 function MedicationCard({ medication, onDelete, onEdit }) {
     const [expanded, setExpanded] = useState(false);
     const { updateMedication } = useMedications();
+    const [countdown, setCountdown] = useState('');
 
     // Refill tracker — update pills remaining
     const handleRefillUpdate = (delta) => {
@@ -102,17 +103,97 @@ function MedicationCard({ medication, onDelete, onEdit }) {
     const pillsRemaining = medication.pillsRemaining ?? medication.quantity ?? null;
     const isLowSupply = pillsRemaining !== null && pillsRemaining <= 7;
 
+    // Color-code by earliest schedule time
+    const getTimeColor = () => {
+        if (!medication.schedule || medication.schedule.length === 0) return 'time-default';
+        const earliest = medication.schedule.sort()[0];
+        const hour = parseInt(earliest.split(':')[0]);
+        if (hour < 12) return 'time-morning';
+        if (hour < 17) return 'time-afternoon';
+        if (hour < 21) return 'time-evening';
+        return 'time-night';
+    };
+
+    // Supply percentage for progress bar
+    const supplyMax = medication.quantity || 30;
+    const supplyPct = pillsRemaining !== null
+        ? Math.min(100, Math.round((pillsRemaining / supplyMax) * 100))
+        : null;
+
+    // Countdown to next dose
+    useEffect(() => {
+        if (!medication.schedule || medication.schedule.length === 0) return;
+
+        function calcCountdown() {
+            const now = new Date();
+            let nearest = null;
+
+            for (const t of medication.schedule) {
+                const [h, m] = t.split(':').map(Number);
+                const dose = new Date();
+                dose.setHours(h, m, 0, 0);
+                if (dose > now && (nearest === null || dose < nearest)) {
+                    nearest = dose;
+                }
+            }
+
+            // If no dose is left today, show first dose tomorrow
+            if (!nearest) {
+                const firstTime = medication.schedule.sort()[0];
+                const [h, m] = firstTime.split(':').map(Number);
+                nearest = new Date();
+                nearest.setDate(nearest.getDate() + 1);
+                nearest.setHours(h, m, 0, 0);
+            }
+
+            const diff = nearest - now;
+            const hrs = Math.floor(diff / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+
+            if (hrs > 0) {
+                setCountdown(`${hrs}h ${mins}m`);
+            } else {
+                setCountdown(`${mins}m`);
+            }
+        }
+
+        calcCountdown();
+        const interval = setInterval(calcCountdown, 60000);
+        return () => clearInterval(interval);
+    }, [medication.schedule]);
+
+    const timeColor = getTimeColor();
+
     return (
-        <div className={`medication-card ${isLowSupply ? 'medication-card-low' : ''}`}>
+        <div className={`medication-card ${isLowSupply ? 'medication-card-low' : ''} ${timeColor}`}>
             <div className="medication-card-header" onClick={() => setExpanded(!expanded)}>
-                <div className="medication-icon">💊</div>
+                <div className={`medication-icon medication-icon-${timeColor}`}>💊</div>
                 <div className="medication-title">
                     <h3>{medication.drugName}</h3>
                     <p>{medication.dosage} • {medication.frequency}</p>
-                    {isLowSupply && (
-                        <span className="refill-alert">⚠️ Low supply — {pillsRemaining} pill{pillsRemaining !== 1 ? 's' : ''} left</span>
-                    )}
+                    <div className="medication-meta-row">
+                        {countdown && (
+                            <span className="next-dose-badge">
+                                <Clock size={12} /> Next in {countdown}
+                            </span>
+                        )}
+                        {isLowSupply && (
+                            <span className="refill-alert">⚠️ {pillsRemaining} pill{pillsRemaining !== 1 ? 's' : ''} left</span>
+                        )}
+                    </div>
                 </div>
+                {/* Supply progress bar (compact) */}
+                {supplyPct !== null && (
+                    <div className="supply-mini">
+                        <div className="supply-mini-bar">
+                            <div
+                                className={`supply-mini-fill ${supplyPct <= 25 ? 'supply-low' : supplyPct <= 50 ? 'supply-mid' : 'supply-ok'}`}
+                                style={{ width: `${supplyPct}%` }}
+                            />
+                        </div>
+                        <span className="supply-mini-label">{pillsRemaining}</span>
+                    </div>
+                )}
                 <span className="expand-btn">{expanded ? '▼' : '▶'}</span>
             </div>
 
@@ -181,7 +262,17 @@ function MedicationCard({ medication, onDelete, onEdit }) {
 
                     {/* Refill tracker */}
                     <div className="refill-tracker">
-                        <span className="refill-label">💊 Pills remaining</span>
+                        <div className="refill-tracker-top">
+                            <span className="refill-label">💊 Pills remaining</span>
+                            {supplyPct !== null && (
+                                <div className="supply-bar">
+                                    <div
+                                        className={`supply-bar-fill ${supplyPct <= 25 ? 'supply-low' : supplyPct <= 50 ? 'supply-mid' : 'supply-ok'}`}
+                                        style={{ width: `${supplyPct}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                         <div className="refill-controls">
                             <button
                                 className="refill-btn"
