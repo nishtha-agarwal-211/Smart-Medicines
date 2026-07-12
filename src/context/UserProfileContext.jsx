@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import StorageService from '../utils/StorageService';
 
 const UserProfileContext = createContext();
 
@@ -10,32 +11,74 @@ const DEFAULT_PROFILE = {
     gender: '',
     phone: '',
     emergencyNote: '',
+    caregiverName: '',
+    caregiverEmail: '',
+    caregiverPhone: '',
 };
 
-export function UserProfileProvider({ children }) {
-    const [profile, setProfile] = useState(() => {
-        try {
-            const saved = localStorage.getItem('userProfile');
-            if (saved) return { ...DEFAULT_PROFILE, ...JSON.parse(saved) };
-            // Migrate pre-existing patientName from old storage key
-            const legacyName = localStorage.getItem('patientName') || '';
-            return { ...DEFAULT_PROFILE, name: legacyName };
-        } catch {
-            return { ...DEFAULT_PROFILE };
-        }
-    });
+export function UserProfileProvider({ userId, children }) {
+    const [profile, setProfile] = useState({ ...DEFAULT_PROFILE });
+    const [profileLoaded, setProfileLoaded] = useState(false);
 
+    // Subscribe to profile document in Firestore (or localStorage fallback)
     useEffect(() => {
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        // Keep the legacy key in sync so components still using patientName prop work
-        if (profile.name) localStorage.setItem('patientName', profile.name);
-    }, [profile]);
+        if (!userId) {
+            // No user — reset to defaults
+            setProfile({ ...DEFAULT_PROFILE });
+            setProfileLoaded(false);
+            return;
+        }
 
-    const updateProfile = (updates) =>
-        setProfile(prev => ({ ...prev, ...updates }));
+        const unsubscribe = StorageService.subscribeToDocument(userId, 'profile/main', (data) => {
+            if (data) {
+                setProfile({ ...DEFAULT_PROFILE, ...data });
+            } else {
+                // No profile yet — initialize with defaults
+                // Try migrating legacy localStorage data
+                try {
+                    const legacyProfile = localStorage.getItem('userProfile');
+                    const legacyName = localStorage.getItem('patientName');
+                    if (legacyProfile) {
+                        const parsed = JSON.parse(legacyProfile);
+                        const migrated = { ...DEFAULT_PROFILE, ...parsed };
+                        setProfile(migrated);
+                        // Persist migration to Firestore
+                        StorageService.setDocument(userId, 'profile/main', migrated);
+                    } else if (legacyName) {
+                        const migrated = { ...DEFAULT_PROFILE, name: legacyName };
+                        setProfile(migrated);
+                        StorageService.setDocument(userId, 'profile/main', migrated);
+                    } else {
+                        setProfile({ ...DEFAULT_PROFILE });
+                    }
+                } catch {
+                    setProfile({ ...DEFAULT_PROFILE });
+                }
+            }
+            setProfileLoaded(true);
+        });
+
+        return () => unsubscribe();
+    }, [userId]);
+
+    const updateProfile = async (updates) => {
+        const newProfile = { ...profile, ...updates };
+        // Optimistic update
+        setProfile(newProfile);
+
+        // Persist to Firestore
+        if (userId) {
+            await StorageService.setDocument(userId, 'profile/main', newProfile);
+        }
+
+        // Keep the legacy key in sync so components still using patientName prop work
+        if (newProfile.name) {
+            try { localStorage.setItem('patientName', newProfile.name); } catch { /* ignore */ }
+        }
+    };
 
     return (
-        <UserProfileContext.Provider value={{ profile, updateProfile }}>
+        <UserProfileContext.Provider value={{ profile, profileLoaded, updateProfile }}>
             {children}
         </UserProfileContext.Provider>
     );

@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { scheduleMedicationReminders, clearAllReminders, checkMissedDoses } from '../utils/notifications';
+import { isMedicationScheduledForDate } from '../utils/schedule';
+import StorageService from '../utils/StorageService';
 
 const MedicationContext = createContext();
 
@@ -11,34 +13,35 @@ export function useMedications() {
     return context;
 }
 
-export function MedicationProvider({ children }) {
+export function MedicationProvider({ userId, children }) {
     const [medications, setMedications] = useState([]);
     const [adherenceLogs, setAdherenceLogs] = useState([]);
     const [scheduledReminders, setScheduledReminders] = useState([]);
     const [missedDoses, setMissedDoses] = useState([]);
+    const [dataLoaded, setDataLoaded] = useState(false);
 
-    // Load data from localStorage on mount
+    // Load data from Firestore (or localStorage fallback) on mount / userId change
     useEffect(() => {
-        const savedMedications = localStorage.getItem('medications');
-        const savedLogs = localStorage.getItem('adherenceLogs');
+        if (!userId) return;
 
-        if (savedMedications) {
-            setMedications(JSON.parse(savedMedications));
-        }
-        if (savedLogs) {
-            setAdherenceLogs(JSON.parse(savedLogs));
-        }
-    }, []);
+        setDataLoaded(false);
 
-    // Save medications to localStorage whenever they change (always, even empty)
-    useEffect(() => {
-        localStorage.setItem('medications', JSON.stringify(medications));
-    }, [medications]);
+        // Subscribe to medications collection for real-time sync
+        const unsubMeds = StorageService.subscribeToCollection(userId, 'medications', (items) => {
+            setMedications(items);
+        });
 
-    // Save adherence logs to localStorage (always, even empty)
-    useEffect(() => {
-        localStorage.setItem('adherenceLogs', JSON.stringify(adherenceLogs));
-    }, [adherenceLogs]);
+        // Subscribe to adherence logs
+        const unsubLogs = StorageService.subscribeToCollection(userId, 'adherenceLogs', (items) => {
+            setAdherenceLogs(items);
+            setDataLoaded(true);
+        });
+
+        return () => {
+            unsubMeds();
+            unsubLogs();
+        };
+    }, [userId]);
 
     // Schedule reminders whenever medications change
     useEffect(() => {
@@ -82,29 +85,61 @@ export function MedicationProvider({ children }) {
         window.dispatchEvent(new CustomEvent('medicationReminder', { detail: { medication, time } }));
     }
 
-    function addMedication(medication) {
+    function generateId() {
+        return 'id_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    }
+
+    async function addMedication(medication) {
         const newMedication = {
             ...medication,
             id: generateId(),
             createdAt: new Date().toISOString()
         };
+
+        // Optimistic update
         setMedications(prev => [...prev, newMedication]);
+
+        // Persist to Firestore
+        if (userId) {
+            const saved = await StorageService.addToCollection(userId, 'medications', newMedication);
+            // If Firestore assigned a different id, update it
+            if (saved.id !== newMedication.id) {
+                setMedications(prev =>
+                    prev.map(m => m.id === newMedication.id ? { ...m, id: saved.id } : m)
+                );
+                return { ...newMedication, id: saved.id };
+            }
+        }
+
         return newMedication;
     }
 
-    function updateMedication(id, updates) {
+    async function updateMedication(id, updates) {
+        // Optimistic update
         setMedications(prev =>
             prev.map(med => (med.id === id ? { ...med, ...updates } : med))
         );
+
+        // Persist to Firestore
+        if (userId) {
+            await StorageService.updateInCollection(userId, 'medications', id, updates);
+        }
     }
 
-    function deleteMedication(id) {
+    async function deleteMedication(id) {
+        // Optimistic update
         setMedications(prev => prev.filter(med => med.id !== id));
-        // Also remove related adherence logs
         setAdherenceLogs(prev => prev.filter(log => log.medicationId !== id));
+
+        // Persist to Firestore
+        if (userId) {
+            await StorageService.deleteFromCollection(userId, 'medications', id);
+            // Note: adherence log cleanup in Firestore would need a batch delete
+            // For now, the real-time listener will handle the UI state
+        }
     }
 
-    function logAdherence(medicationId, scheduledTime, status, actualTime = null) {
+    async function logAdherence(medicationId, scheduledTime, status, actualTime = null) {
         // Prevent duplicate logs for the same medication and scheduled time
         const alreadyLogged = adherenceLogs.some(
             existing =>
@@ -121,6 +156,8 @@ export function MedicationProvider({ children }) {
             status, // 'taken', 'taken_late', 'missed', 'skipped'
             timestamp: new Date().toISOString()
         };
+
+        // Optimistic update
         setAdherenceLogs(prev => [...prev, log]);
 
         // Remove from missed doses if it was there
@@ -131,7 +168,64 @@ export function MedicationProvider({ children }) {
             )
         );
 
+        // Persist to Firestore
+        if (userId) {
+            await StorageService.addToCollection(userId, 'adherenceLogs', log);
+        }
+
         return log;
+    }
+
+    async function logRetroactiveDose(medicationId, scheduledTime, status, actualTime) {
+        // Allow backdated logging — check for existing log
+        const alreadyLogged = adherenceLogs.some(
+            existing =>
+                existing.medicationId === medicationId &&
+                existing.scheduledTime === scheduledTime
+        );
+
+        if (alreadyLogged) {
+            // Update existing log instead of adding duplicate
+            setAdherenceLogs(prev =>
+                prev.map(log =>
+                    log.medicationId === medicationId && log.scheduledTime === scheduledTime
+                        ? { ...log, status, actualTime: actualTime || log.actualTime }
+                        : log
+                )
+            );
+
+            // Find the log id to update in Firestore
+            if (userId) {
+                const existingLog = adherenceLogs.find(
+                    l => l.medicationId === medicationId && l.scheduledTime === scheduledTime
+                );
+                if (existingLog?.id) {
+                    await StorageService.updateInCollection(userId, 'adherenceLogs', existingLog.id, {
+                        status,
+                        actualTime: actualTime || existingLog.actualTime,
+                    });
+                }
+            }
+            return;
+        }
+
+        const log = {
+            id: generateId(),
+            medicationId,
+            scheduledTime,
+            actualTime: actualTime || new Date().toISOString(),
+            status,
+            timestamp: new Date().toISOString(),
+            isRetroactive: true
+        };
+
+        // Optimistic update
+        setAdherenceLogs(prev => [...prev, log]);
+
+        // Persist to Firestore
+        if (userId) {
+            await StorageService.addToCollection(userId, 'adherenceLogs', log);
+        }
     }
 
     function getMedicationById(id) {
@@ -140,10 +234,12 @@ export function MedicationProvider({ children }) {
 
     function getTodaySchedule() {
         const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
         const schedule = [];
 
         medications.forEach(medication => {
             if (!medication.schedule) return;
+            if (!isMedicationScheduledForDate(medication, now)) return;
 
             medication.schedule.forEach(time => {
                 const scheduledDateTime = `${today}T${time}`;
@@ -188,26 +284,32 @@ export function MedicationProvider({ children }) {
     function calculateTotalScheduled(days) {
         // Calculate total doses that should have been taken in the period
         let total = 0;
+        const today = new Date();
         medications.forEach(medication => {
-            if (medication.schedule) {
-                total += medication.schedule.length * days;
+            if (!medication.schedule) return;
+            
+            // Loop through each day in the window and check if the medication is scheduled
+            for (let i = 0; i < days; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                if (isMedicationScheduledForDate(medication, d)) {
+                    total += medication.schedule.length;
+                }
             }
         });
         return total;
-    }
-
-    function generateId() {
-        return 'id_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
     }
 
     const value = {
         medications,
         adherenceLogs,
         missedDoses,
+        dataLoaded,
         addMedication,
         updateMedication,
         deleteMedication,
         logAdherence,
+        logRetroactiveDose,
         getMedicationById,
         getTodaySchedule,
         getAdherenceRate

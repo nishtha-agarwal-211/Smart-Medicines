@@ -11,6 +11,8 @@ export default function ManualMedicationEntry({ onNavigate }) {
         drugName: '',
         dosage: '',
         frequency: 'once daily',
+        frequencyDays: [],
+        frequencyMonthDay: new Date().getDate(),
         timing: [],
         withFood: false,
         duration: '',
@@ -28,6 +30,9 @@ export default function ManualMedicationEntry({ onNavigate }) {
         'three times daily',
         'four times daily',
         'every other day',
+        'once weekly',
+        'twice weekly',
+        'once monthly',
         'as needed'
     ];
 
@@ -44,6 +49,28 @@ export default function ManualMedicationEntry({ onNavigate }) {
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
+    };
+
+    const handleFrequencyChange = (value) => {
+        let extra = {};
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (value === 'once weekly') {
+            extra.frequencyDays = [dayNames[new Date().getDay()]];
+        } else if (value === 'twice weekly') {
+            extra.frequencyDays = ['Wednesday', 'Sunday'];
+        } else if (value === 'once monthly') {
+            extra.frequencyMonthDay = new Date().getDate();
+        }
+        setFormData(prev => ({
+            ...prev,
+            frequency: value,
+            ...extra
+        }));
+        setErrors(prev => ({
+            ...prev,
+            frequency: '',
+            frequencyDays: ''
+        }));
     };
 
     const toggleTiming = (time) => {
@@ -87,6 +114,14 @@ export default function ManualMedicationEntry({ onNavigate }) {
             newErrors.timing = 'Please select at least one time';
         }
 
+        if (formData.frequency === 'once weekly' && (!formData.frequencyDays || formData.frequencyDays.length === 0)) {
+            newErrors.frequencyDays = 'Please select a day of the week';
+        }
+
+        if (formData.frequency === 'twice weekly' && (!formData.frequencyDays || formData.frequencyDays.length !== 2)) {
+            newErrors.frequencyDays = 'Please select exactly 2 days of the week';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -103,6 +138,8 @@ export default function ManualMedicationEntry({ onNavigate }) {
             drugName: formData.drugName,
             dosage: formData.dosage,
             frequency: formData.frequency,
+            frequencyDays: formData.frequencyDays,
+            frequencyMonthDay: formData.frequencyMonthDay,
             timing: formData.timing.map(time => {
                 const [hours] = time.split(':');
                 const hour = parseInt(hours);
@@ -196,13 +233,67 @@ export default function ManualMedicationEntry({ onNavigate }) {
                             id="frequency"
                             className="form-select"
                             value={formData.frequency}
-                            onChange={(e) => handleInputChange('frequency', e.target.value)}
+                            onChange={(e) => handleFrequencyChange(e.target.value)}
                         >
                             {frequencyOptions.map(option => (
                                 <option key={option} value={option}>{option}</option>
                             ))}
                         </select>
                     </div>
+
+                    {/* Custom Frequency Sub-options */}
+                    {(formData.frequency === 'once weekly' || formData.frequency === 'twice weekly') && (
+                        <div className="form-group sub-options-group">
+                            <label>
+                                Select Day{formData.frequency === 'twice weekly' ? 's' : ''} of the Week 
+                                {formData.frequency === 'twice weekly' && <span className="helper-text">(Choose exactly 2)</span>}
+                            </label>
+                            <div className="days-selector">
+                                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => {
+                                    const isSelected = formData.frequencyDays?.includes(day);
+                                    return (
+                                        <button
+                                            key={day}
+                                            type="button"
+                                            className={`day-chip ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => {
+                                                let updatedDays = [...(formData.frequencyDays || [])];
+                                                if (formData.frequency === 'once weekly') {
+                                                    updatedDays = [day];
+                                                } else {
+                                                    if (isSelected) {
+                                                        updatedDays = updatedDays.filter(d => d !== day);
+                                                    } else {
+                                                        updatedDays.push(day);
+                                                    }
+                                                }
+                                                handleInputChange('frequencyDays', updatedDays);
+                                            }}
+                                        >
+                                            {day.substring(0, 3)}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors.frequencyDays && <span className="error-message">{errors.frequencyDays}</span>}
+                        </div>
+                    )}
+
+                    {formData.frequency === 'once monthly' && (
+                        <div className="form-group sub-options-group">
+                            <label htmlFor="frequencyMonthDay">Day of the Month</label>
+                            <select
+                                id="frequencyMonthDay"
+                                className="form-select"
+                                value={formData.frequencyMonthDay || new Date().getDate()}
+                                onChange={(e) => handleInputChange('frequencyMonthDay', Number(e.target.value))}
+                            >
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                                    <option key={day} value={day}>Day {day}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Timing */}
                     <div className="form-group">

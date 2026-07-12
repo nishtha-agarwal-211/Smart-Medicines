@@ -254,9 +254,78 @@ async function fileToGenerativePart(file) {
   });
 }
 
+/**
+ * Verify a pill photo against active medications using Gemini Vision
+ * @param {File} imageFile - Photo of the pill
+ * @param {Array} medications - User's active medications
+ * @returns {Promise<Object>} Verification result with confidence
+ */
+export async function verifyPillImage(imageFile, medications) {
+  if (!genAI) {
+    throw new Error('Gemini API key is not configured');
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const imageData = await fileToGenerativePart(imageFile);
+
+    const medList = medications.map(m =>
+      `${m.drugName} (${m.dosage}, ${m.frequency})`
+    ).join(', ');
+
+    const prompt = `You are a pharmaceutical AI assistant. A patient has taken a photo of a physical pill and wants to verify if it matches any of their active prescriptions.
+
+Active prescriptions: ${medList}
+
+Analyze the pill in the image — examine its color, shape, size, markings, and imprint codes. Compare against the patient's active medications above.
+
+Return ONLY valid JSON in this exact format:
+{
+  "matchFound": true | false,
+  "matchedMedication": "Drug name if matched, or null",
+  "confidence": 0-100,
+  "pillDescription": {
+    "color": "Observed color",
+    "shape": "Observed shape (round, oval, capsule, etc.)",
+    "markings": "Any visible imprints, numbers, or letters",
+    "size": "Approximate size description"
+  },
+  "analysis": "Detailed explanation of the matching analysis",
+  "recommendation": "What the patient should do"
+}
+
+IMPORTANT SAFETY NOTES:
+- If confidence is below 70%, recommend the patient consult a pharmacist
+- Never confirm with 100% confidence — visual matching has limitations
+- Always recommend professional verification for critical medications`;
+
+    const result = await model.generateContent([prompt, imageData]);
+    const response = await result.response;
+    const text = response.text();
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+
+    return {
+      matchFound: false,
+      matchedMedication: null,
+      confidence: 0,
+      pillDescription: { color: 'Unknown', shape: 'Unknown', markings: 'Unknown', size: 'Unknown' },
+      analysis: 'Unable to analyze the image. Please try with a clearer photo.',
+      recommendation: 'Consult your pharmacist for pill identification.'
+    };
+  } catch (error) {
+    console.error('Error verifying pill:', error);
+    throw new Error('Failed to verify pill. Please try again with a clearer photo.');
+  }
+}
+
 export default {
   analyzePrescription,
   chatWithGemini,
   analyzeMissedDose,
-  detectDrugInteractions
+  detectDrugInteractions,
+  verifyPillImage
 };

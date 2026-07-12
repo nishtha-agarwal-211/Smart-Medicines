@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { User, Phone, Calendar, Droplet, CheckCircle, Edit2, ChevronRight } from 'lucide-react';
+import { User, Phone, Calendar, Droplet, CheckCircle, Edit2, ChevronRight, LogOut, Download } from 'lucide-react';
 import { useUserProfile } from '../context/UserProfileContext';
+import { useAuth } from '../context/AuthContext';
+import StorageService from '../utils/StorageService';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const GENDERS     = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
 
 export default function UserProfile({ onNavigate }) {
     const { profile, updateProfile } = useUserProfile();
+    const { currentUser, logout } = useAuth();
     const [editing, setEditing] = useState(!profile.name); // auto-open editor if name missing
     const [form, setForm]       = useState({ ...profile });
     const [saved, setSaved]     = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -24,6 +28,31 @@ export default function UserProfile({ onNavigate }) {
     const age = profile.dob
         ? Math.floor((Date.now() - new Date(profile.dob)) / (365.25 * 24 * 3600 * 1000))
         : profile.age || null;
+
+    const handleLogout = async () => {
+        await logout();
+    };
+
+    const handleExportData = async () => {
+        if (!currentUser?.uid) return;
+        setExporting(true);
+        try {
+            const data = await StorageService.exportAllData(currentUser.uid);
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `smart-medicine-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Export failed:', err);
+        } finally {
+            setExporting(false);
+        }
+    };
 
     return (
         <div className="profile-container">
@@ -56,6 +85,11 @@ export default function UserProfile({ onNavigate }) {
                                     {age && profile.gender ? ' · ' : ''}
                                     {profile.gender || ''}
                                 </p>
+                                {currentUser?.email && (
+                                    <p className="profile-sub" style={{ fontSize: '13px', marginTop: '2px', opacity: 0.7 }}>
+                                        {currentUser.email}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -87,6 +121,23 @@ export default function UserProfile({ onNavigate }) {
                             </button>
                             <button className="profile-shortcut-btn" onClick={() => onNavigate('emergency-card')}>
                                 <span>🪪 Emergency Card</span>
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
+
+                        {/* Data & Account Actions */}
+                        <div className="profile-shortcuts" style={{ marginTop: '8px' }}>
+                            <button className="profile-shortcut-btn" onClick={handleExportData} disabled={exporting}>
+                                <span><Download size={16} style={{ verticalAlign: '-3px', marginRight: '6px' }} />
+                                    {exporting ? 'Exporting...' : 'Export My Data'}
+                                </span>
+                                <ChevronRight size={18} />
+                            </button>
+                            <button
+                                className="profile-shortcut-btn profile-shortcut-danger"
+                                onClick={handleLogout}
+                            >
+                                <span><LogOut size={16} style={{ verticalAlign: '-3px', marginRight: '6px' }} /> Sign Out</span>
                                 <ChevronRight size={18} />
                             </button>
                         </div>

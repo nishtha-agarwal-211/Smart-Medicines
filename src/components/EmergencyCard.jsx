@@ -4,6 +4,7 @@ import { useEmergencyProfile } from '../context/EmergencyProfileContext';
 import { useMedications } from '../context/MedicationContext';
 import { generateEmergencyQR } from '../utils/qrCode';
 import { generateEmergencyPDF, downloadPDF } from '../utils/emergencyPdf';
+import { formatFrequencyText } from '../utils/schedule';
 
 export default function EmergencyCard({ onNavigate, patientName = 'Patient' }) {
     const {
@@ -28,7 +29,7 @@ export default function EmergencyCard({ onNavigate, patientName = 'Patient' }) {
         criticalMedications: criticalMedsWithDetails.map(med => ({
             drugName: med.drugName,
             dosage: med.dosage,
-            frequency: med.frequency,
+            frequency: formatFrequencyText(med),
             warnings: med.warnings
         })),
         allergies,
@@ -121,7 +122,7 @@ export default function EmergencyCard({ onNavigate, patientName = 'Patient' }) {
                                 {criticalMedsWithDetails.map(med => (
                                     <li key={med.id}>
                                         <strong>{med.drugName}</strong> ({med.dosage})
-                                        <div className="med-details">{med.frequency}</div>
+                                        <div className="med-details">{formatFrequencyText(med)}</div>
                                         {med.warnings && med.warnings.length > 0 && (
                                             <div className="med-warnings">
                                                 {med.warnings.map((warning, idx) => (

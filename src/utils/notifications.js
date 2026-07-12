@@ -2,6 +2,8 @@
  * Browser Notification System for Medication Reminders
  */
 
+import { isMedicationScheduledForDate, getNextScheduledDateTime } from './schedule';
+
 // Request notification permission
 export async function requestNotificationPermission() {
     if (!('Notification' in window)) {
@@ -84,7 +86,7 @@ export function scheduleMedicationReminders(medications, onReminder) {
  * After the first fire, reschedules itself for exactly 24 hours later.
  */
 function scheduleRecurringReminder(medication, time, onReminder, remindersList) {
-    const interval = calculateNextReminderInterval(time);
+    const interval = calculateNextReminderInterval(time, medication);
     if (interval <= 0) return null;
 
     const entry = { medicationId: medication.id, time, timeoutId: null };
@@ -92,8 +94,11 @@ function scheduleRecurringReminder(medication, time, onReminder, remindersList) 
     const fire = () => {
         sendMedicationReminder(medication, time);
         if (onReminder) onReminder(medication, time);
-        // Reschedule for the same time tomorrow (24 hours)
-        entry.timeoutId = setTimeout(fire, 24 * 60 * 60 * 1000);
+        // Reschedule for the next scheduled occurrence
+        const nextInterval = calculateNextReminderInterval(time, medication);
+        if (nextInterval > 0) {
+            entry.timeoutId = setTimeout(fire, nextInterval);
+        }
         // Update the reference in the list so clearAllReminders can find it
         const idx = remindersList.findIndex(r => r === entry);
         if (idx !== -1) remindersList[idx] = entry;
@@ -106,21 +111,14 @@ function scheduleRecurringReminder(medication, time, onReminder, remindersList) 
 /**
  * Calculate milliseconds until next reminder time
  * @param {string} timeString - Time in HH:MM format
+ * @param {Object} medication - Medication object
  * @returns {number} Milliseconds until that time
  */
-function calculateNextReminderInterval(timeString) {
-    const [hours, minutes] = timeString.split(':').map(Number);
-
+function calculateNextReminderInterval(timeString, medication) {
+    const nextDose = getNextScheduledDateTime(medication, timeString);
+    if (!nextDose) return -1;
     const now = new Date();
-    const scheduledTime = new Date();
-    scheduledTime.setHours(hours, minutes, 0, 0);
-
-    // If time has passed today, schedule for tomorrow
-    if (scheduledTime <= now) {
-        scheduledTime.setDate(scheduledTime.getDate() + 1);
-    }
-
-    return scheduledTime.getTime() - now.getTime();
+    return nextDose.getTime() - now.getTime();
 }
 
 /**
@@ -146,6 +144,7 @@ export function checkMissedDoses(medications, adherenceLogs) {
 
     medications.forEach(medication => {
         if (!medication.schedule) return;
+        if (!isMedicationScheduledForDate(medication, now)) return;
 
         medication.schedule.forEach(time => {
             const scheduledDateTime = new Date(`${today}T${time}`);

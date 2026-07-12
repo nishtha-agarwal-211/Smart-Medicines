@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AlertCircle, Clock, Pill, Loader } from 'lucide-react';
 import { useMedications } from '../context/MedicationContext';
+import { formatFrequencyText } from '../utils/schedule';
 import { analyzeMissedDose } from '../utils/gemini';
 
 export default function MissedDoseAdvisor({ onNavigate }) {
@@ -107,7 +108,7 @@ export default function MissedDoseAdvisor({ onNavigate }) {
                         <Pill size={32} />
                         <div>
                             <h3>{selectedMissed.medication.drugName}</h3>
-                            <p>{selectedMissed.medication.dosage} • {selectedMissed.medication.frequency}</p>
+                            <p>{selectedMissed.medication.dosage} • {formatFrequencyText(selectedMissed.medication)}</p>
                         </div>
                     </div>
 
@@ -222,7 +223,7 @@ export default function MissedDoseAdvisor({ onNavigate }) {
                             </div>
                             <div className="detail-item">
                                 <Pill size={16} />
-                                <span>{missed.medication.frequency}</span>
+                                <span>{formatFrequencyText(missed.medication)}</span>
                             </div>
                         </div>
 

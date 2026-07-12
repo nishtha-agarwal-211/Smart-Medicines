@@ -47,3 +47,15 @@
 
 /* 14. Notification panel */
 @import './components/notifications-panel.css';
+
+/* 15. Caregiver Sharing */
+@import './components/caregiver.css';
+
+/* 16. Adherence Calendar */
+@import './components/calendar.css';
+
+/* 17. Pill Visual Verifier */
+@import './components/pill-verifier.css';
+
+/* 18. Authentication Page */
+@import './components/auth.css';

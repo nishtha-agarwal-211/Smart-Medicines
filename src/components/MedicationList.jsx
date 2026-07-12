@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMedications } from '../context/MedicationContext';
 import { Pill, Edit2, Trash2, Clock, AlertTriangle, Plus, CheckCircle, X, Minus } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import { formatFrequencyText, getNextScheduledDateTime } from '../utils/schedule';
 
 export default function MedicationList({ onNavigate }) {
     const { medications, deleteMedication, updateMedication } = useMedications();
@@ -129,28 +130,25 @@ function MedicationCard({ medication, onDelete, onEdit }) {
             let nearest = null;
 
             for (const t of medication.schedule) {
-                const [h, m] = t.split(':').map(Number);
-                const dose = new Date();
-                dose.setHours(h, m, 0, 0);
-                if (dose > now && (nearest === null || dose < nearest)) {
-                    nearest = dose;
+                const nextDoseTime = getNextScheduledDateTime(medication, t);
+                if (nextDoseTime && (nearest === null || nextDoseTime < nearest)) {
+                    nearest = nextDoseTime;
                 }
             }
 
-            // If no dose is left today, show first dose tomorrow
             if (!nearest) {
-                const firstTime = medication.schedule.sort()[0];
-                const [h, m] = firstTime.split(':').map(Number);
-                nearest = new Date();
-                nearest.setDate(nearest.getDate() + 1);
-                nearest.setHours(h, m, 0, 0);
+                setCountdown('');
+                return;
             }
 
             const diff = nearest - now;
-            const hrs = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / (24 * 3600000));
+            const hrs = Math.floor((diff % (24 * 3600000)) / 3600000);
             const mins = Math.floor((diff % 3600000) / 60000);
 
-            if (hrs > 0) {
+            if (days > 0) {
+                setCountdown(`${days}d ${hrs}h`);
+            } else if (hrs > 0) {
                 setCountdown(`${hrs}h ${mins}m`);
             } else {
                 setCountdown(`${mins}m`);
@@ -160,7 +158,7 @@ function MedicationCard({ medication, onDelete, onEdit }) {
         calcCountdown();
         const interval = setInterval(calcCountdown, 60000);
         return () => clearInterval(interval);
-    }, [medication.schedule]);
+    }, [medication.schedule, medication.frequency, medication.frequencyDays, medication.frequencyMonthDay]);
 
     const timeColor = getTimeColor();
 
@@ -170,7 +168,7 @@ function MedicationCard({ medication, onDelete, onEdit }) {
                 <div className={`medication-icon medication-icon-${timeColor}`}>💊</div>
                 <div className="medication-title">
                     <h3>{medication.drugName}</h3>
-                    <p>{medication.dosage} • {medication.frequency}</p>
+                    <p>{medication.dosage} • {formatFrequencyText(medication)}</p>
                     <div className="medication-meta-row">
                         {countdown && (
                             <span className="next-dose-badge">
@@ -341,13 +339,16 @@ function EditMedicationForm({ medication, onSave, onCancel }) {
 
     const frequencyOptions = [
         'once daily', 'twice daily', 'three times daily',
-        'four times daily', 'every other day', 'as needed',
+        'four times daily', 'every other day', 'once weekly',
+        'twice weekly', 'once monthly', 'as needed',
     ];
 
     const [form, setForm] = useState({
         drugName:    medication.drugName || '',
         dosage:      medication.dosage || '',
         frequency:   medication.frequency || 'once daily',
+        frequencyDays: medication.frequencyDays || [],
+        frequencyMonthDay: medication.frequencyMonthDay || new Date().getDate(),
         schedule:    medication.schedule || [],
         withFood:    medication.withFood || false,
         duration:    medication.duration || '',
@@ -363,6 +364,28 @@ function EditMedicationForm({ medication, onSave, onCancel }) {
     const set = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+    };
+
+    const handleFrequencyChange = (value) => {
+        let extra = {};
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (value === 'once weekly') {
+            extra.frequencyDays = [dayNames[new Date().getDay()]];
+        } else if (value === 'twice weekly') {
+            extra.frequencyDays = ['Wednesday', 'Sunday'];
+        } else if (value === 'once monthly') {
+            extra.frequencyMonthDay = new Date().getDate();
+        }
+        setForm(prev => ({
+            ...prev,
+            frequency: value,
+            ...extra
+        }));
+        setErrors(prev => ({
+            ...prev,
+            frequency: '',
+            frequencyDays: ''
+        }));
     };
 
     const toggleTiming = (time) => {
@@ -386,6 +409,14 @@ function EditMedicationForm({ medication, onSave, onCancel }) {
         if (!form.drugName.trim()) e.drugName = 'Name is required';
         if (!form.dosage.trim()) e.dosage = 'Dosage is required';
         if (form.schedule.length === 0) e.schedule = 'Select at least one time';
+
+        if (form.frequency === 'once weekly' && (!form.frequencyDays || form.frequencyDays.length === 0)) {
+            e.frequencyDays = 'Select a day of the week';
+        }
+        if (form.frequency === 'twice weekly' && (!form.frequencyDays || form.frequencyDays.length !== 2)) {
+            e.frequencyDays = 'Select exactly 2 days of the week';
+        }
+
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -426,10 +457,64 @@ function EditMedicationForm({ medication, onSave, onCancel }) {
                     <div className="form-group">
                         <label htmlFor="edit-frequency">Frequency</label>
                         <select id="edit-frequency" className="form-select"
-                            value={form.frequency} onChange={e => set('frequency', e.target.value)}>
+                            value={form.frequency} onChange={e => handleFrequencyChange(e.target.value)}>
                             {frequencyOptions.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
                     </div>
+
+                    {/* Custom Frequency Sub-options */}
+                    {(form.frequency === 'once weekly' || form.frequency === 'twice weekly') && (
+                        <div className="form-group sub-options-group">
+                            <label>
+                                Select Day{form.frequency === 'twice weekly' ? 's' : ''} of the Week 
+                                {form.frequency === 'twice weekly' && <span className="helper-text">(Choose exactly 2)</span>}
+                            </label>
+                            <div className="days-selector">
+                                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => {
+                                    const isSelected = form.frequencyDays?.includes(day);
+                                    return (
+                                        <button
+                                            key={day}
+                                            type="button"
+                                            className={`day-chip ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => {
+                                                let updatedDays = [...(form.frequencyDays || [])];
+                                                if (form.frequency === 'once weekly') {
+                                                    updatedDays = [day];
+                                                } else {
+                                                    if (isSelected) {
+                                                        updatedDays = updatedDays.filter(d => d !== day);
+                                                    } else {
+                                                        updatedDays.push(day);
+                                                    }
+                                                }
+                                                set('frequencyDays', updatedDays);
+                                            }}
+                                        >
+                                            {day.substring(0, 3)}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors.frequencyDays && <span className="error-message">{errors.frequencyDays}</span>}
+                        </div>
+                    )}
+
+                    {form.frequency === 'once monthly' && (
+                        <div className="form-group sub-options-group">
+                            <label htmlFor="edit-frequencyMonthDay">Day of the Month</label>
+                            <select
+                                id="edit-frequencyMonthDay"
+                                className="form-select"
+                                value={form.frequencyMonthDay || new Date().getDate()}
+                                onChange={(e) => set('frequencyMonthDay', Number(e.target.value))}
+                            >
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                                    <option key={day} value={day}>Day {day}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="form-group">
                         <label>When to take <span className="required">*</span></label>

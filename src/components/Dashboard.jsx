@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMedications } from '../context/MedicationContext';
-import { Pill, TrendingUp, Calendar, AlertCircle, Plus, Zap, Clock, Activity, CheckCircle, ChevronRight, BarChart3, Flame } from 'lucide-react';
+import { Pill, TrendingUp, Calendar, AlertCircle, Plus, Zap, Clock, Activity, CheckCircle, ChevronRight, BarChart3, Flame, Volume2, VolumeX, Package } from 'lucide-react';
 import { detectDrugInteractions } from '../utils/gemini';
+import { isMedicationScheduledForDate, formatFrequencyText } from '../utils/schedule';
 
 // ── Animated counter hook ────────────────────────────────────────────────────
 function useAnimatedCounter(target, duration = 800) {
@@ -146,6 +147,183 @@ function StreakCard({ adherenceLogs, medications }) {
     );
 }
 
+// ── Voice Read-Aloud ─────────────────────────────────────────────────────────
+function VoiceReadAloud({ schedule, medications }) {
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const synthRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            // Cleanup: stop speaking when component unmounts
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, []);
+
+    const formatScheduleText = () => {
+        if (schedule.length === 0) {
+            return 'You have no medications scheduled for today. Enjoy your day!';
+        }
+
+        const pending = schedule.filter(s => s.status === 'pending');
+        const taken = schedule.filter(s => s.status === 'taken' || s.status === 'taken_late');
+        const missed = schedule.filter(s => s.status === 'missed');
+
+        let text = `Here is your medication schedule for today. `;
+        text += `You have ${schedule.length} dose${schedule.length !== 1 ? 's' : ''} scheduled. `;
+
+        if (taken.length > 0) {
+            text += `${taken.length} ${taken.length === 1 ? 'has' : 'have'} been taken. `;
+        }
+        if (pending.length > 0) {
+            text += `${pending.length} ${pending.length === 1 ? 'is' : 'are'} still pending. `;
+            pending.forEach(item => {
+                const [h, m] = item.time.split(':');
+                const hour = parseInt(h);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 || 12;
+                text += `${item.medication.drugName}, ${item.medication.dosage}, scheduled at ${displayHour}:${m} ${ampm}. `;
+                if (item.medication.withFood) {
+                    text += `Take this with food. `;
+                }
+                if (item.medication.warnings && item.medication.warnings.length > 0) {
+                    text += `Warning: ${item.medication.warnings[0]}. `;
+                }
+            });
+        }
+        if (missed.length > 0) {
+            text += `Attention: You have ${missed.length} missed dose${missed.length !== 1 ? 's' : ''}. `;
+            missed.forEach(item => {
+                text += `${item.medication.drugName} was missed. `;
+            });
+            text += `Please check with the AI assistant for guidance. `;
+        }
+
+        return text;
+    };
+
+    const handleToggle = () => {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+
+        if (isSpeaking) {
+            synth.cancel();
+            setIsSpeaking(false);
+            return;
+        }
+
+        const text = formatScheduleText();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.lang = 'en-US';
+
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+
+        synth.cancel(); // Clear any queued speech
+        synth.speak(utterance);
+        setIsSpeaking(true);
+    };
+
+    if (!window.speechSynthesis) return null;
+
+    return (
+        <button
+            className={`voice-btn ${isSpeaking ? 'voice-active' : ''}`}
+            onClick={handleToggle}
+            title={isSpeaking ? 'Stop reading' : 'Read schedule aloud'}
+        >
+            {isSpeaking ? (
+                <>
+                    <VolumeX size={16} />
+                    <div className="voice-wave">
+                        <span className="voice-wave-bar" />
+                        <span className="voice-wave-bar" />
+                        <span className="voice-wave-bar" />
+                        <span className="voice-wave-bar" />
+                    </div>
+                    Stop
+                </>
+            ) : (
+                <>
+                    <Volume2 size={16} />
+                    Listen
+                </>
+            )}
+        </button>
+    );
+}
+
+// ── Refill Tracker Widget ─────────────────────────────────────────────────────
+function RefillTrackerWidget({ medications, onNavigate }) {
+    const lowStockMeds = medications.filter(med => {
+        const remaining = med.pillsRemaining ?? med.quantity ?? null;
+        return remaining !== null && remaining <= 14;
+    }).sort((a, b) => {
+        const ra = a.pillsRemaining ?? a.quantity;
+        const rb = b.pillsRemaining ?? b.quantity;
+        return ra - rb;
+    });
+
+    if (lowStockMeds.length === 0) return null;
+
+    return (
+        <section className="refill-tracker-section">
+            <div className="section-header">
+                <div className="section-header-left">
+                    <Package size={20} className="section-header-icon" />
+                    <h2>Refill Tracker</h2>
+                </div>
+                <button
+                    className="btn-link"
+                    onClick={() => onNavigate('caregiver')}
+                    style={{ fontSize: 'var(--text-small)' }}
+                >
+                    Share Alert →
+                </button>
+            </div>
+            <div className="refill-list">
+                {lowStockMeds.map(med => {
+                    const remaining = med.pillsRemaining ?? med.quantity;
+                    const maxPills = med.originalQuantity || 30;
+                    const pct = Math.min(100, Math.round((remaining / maxPills) * 100));
+                    const isCritical = remaining <= 3;
+                    const isWarning = remaining <= 7;
+
+                    return (
+                        <div
+                            key={med.id}
+                            className={`refill-item ${isCritical ? 'refill-item-critical' : isWarning ? 'refill-item-warning' : ''}`}
+                        >
+                            <div className="refill-pill-icon">💊</div>
+                            <div className="refill-info">
+                                <span className="refill-drug-name">{med.drugName}</span>
+                                <div className="refill-bar-wrap">
+                                    <div
+                                        className={`refill-bar-fill ${isCritical ? 'refill-bar-critical' : isWarning ? 'refill-bar-warning' : 'refill-bar-ok'}`}
+                                        style={{ width: `${pct}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <span className={`refill-count ${isCritical ? 'refill-count-critical' : isWarning ? 'refill-count-warning' : ''}`}>
+                                {remaining} left
+                            </span>
+                            <button
+                                className="refill-share-btn"
+                                onClick={() => onNavigate('caregiver')}
+                            >
+                                Share
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
 
 export default function Dashboard({ onNavigate, patientName, onEditName, darkMode, onToggleDarkMode }) {
     const { medications, getTodaySchedule, getAdherenceRate, missedDoses, adherenceLogs } = useMedications();
@@ -213,7 +391,12 @@ export default function Dashboard({ onNavigate, patientName, onEditName, darkMod
         ).length;
 
         // Count how many were scheduled on that day
-        const scheduled = medications.reduce((sum, med) => sum + (med.schedule?.length || 0), 0);
+        const scheduled = medications.reduce((sum, med) => {
+            if (isMedicationScheduledForDate(med, d)) {
+                return sum + (med.schedule?.length || 0);
+            }
+            return sum;
+        }, 0);
 
         const pct = scheduled > 0 ? Math.min(100, Math.round((taken / scheduled) * 100)) : 0;
         return { label, pct, isToday: i === 6 };
@@ -405,10 +588,13 @@ export default function Dashboard({ onNavigate, patientName, onEditName, darkMod
                         <Clock size={20} className="section-header-icon" />
                         <h2>Today's Schedule</h2>
                     </div>
-                    <span className="date">{new Date().toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    })}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <VoiceReadAloud schedule={todaySchedule} medications={medications} />
+                        <span className="date">{new Date().toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                        })}</span>
+                    </div>
                 </div>
 
                 {todaySchedule.length === 0 ? (
@@ -437,6 +623,9 @@ export default function Dashboard({ onNavigate, patientName, onEditName, darkMod
                     </div>
                 )}
             </section>
+
+            {/* Refill Tracker Widget */}
+            <RefillTrackerWidget medications={medications} onNavigate={onNavigate} />
 
             {/* Quick Actions */}
             <div className="quick-actions">
@@ -474,6 +663,33 @@ export default function Dashboard({ onNavigate, patientName, onEditName, darkMod
                     <div className="action-card-content">
                         <span className="action-card-title">AI Assistant</span>
                         <span className="action-card-desc">Get health guidance</span>
+                    </div>
+                    <ChevronRight size={18} className="action-card-arrow" />
+                </button>
+
+                <button className="action-card" onClick={() => onNavigate('caregiver')}>
+                    <div className="action-card-icon" style={{ background: '#ECFDF5', color: '#059669', fontSize: '20px' }}>👥</div>
+                    <div className="action-card-content">
+                        <span className="action-card-title">Caregiver Share</span>
+                        <span className="action-card-desc">Share with family</span>
+                    </div>
+                    <ChevronRight size={18} className="action-card-arrow" />
+                </button>
+
+                <button className="action-card" onClick={() => onNavigate('calendar')}>
+                    <div className="action-card-icon" style={{ background: '#FEF3C7', color: '#D97706', fontSize: '20px' }}>📅</div>
+                    <div className="action-card-content">
+                        <span className="action-card-title">Adherence Calendar</span>
+                        <span className="action-card-desc">Track your history</span>
+                    </div>
+                    <ChevronRight size={18} className="action-card-arrow" />
+                </button>
+
+                <button className="action-card" onClick={() => onNavigate('pill-verify')}>
+                    <div className="action-card-icon" style={{ background: '#FEF2F2', color: '#DC2626', fontSize: '20px' }}>📸</div>
+                    <div className="action-card-content">
+                        <span className="action-card-title">Pill Verifier</span>
+                        <span className="action-card-desc">Verify your pills</span>
                     </div>
                     <ChevronRight size={18} className="action-card-arrow" />
                 </button>
@@ -528,7 +744,7 @@ function ScheduleItem({ item, onNavigate }) {
 
             <div className="schedule-content">
                 <h4>{medication.drugName}</h4>
-                <p>{medication.dosage} • {medication.frequency}</p>
+                <p>{medication.dosage} • {formatFrequencyText(medication)}</p>
                 {medication.warnings && medication.warnings.length > 0 && (
                     <p className="warning-text">⚠️ {medication.warnings[0]}</p>
                 )}

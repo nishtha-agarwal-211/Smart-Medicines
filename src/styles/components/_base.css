@@ -374,14 +374,16 @@ ul, ol {
   color: white;
 }
 
-/* Timing chips */
-.timing-chips {
+/* Timing chips & Day chips */
+.timing-chips,
+.days-selector {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.timing-chip {
+.timing-chip,
+.day-chip {
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
   border: 1.5px solid var(--border-default);
@@ -396,19 +398,28 @@ ul, ol {
   align-items: center;
 }
 
-.timing-chip:hover {
+.timing-chip:hover,
+.day-chip:hover {
   border-color: var(--primary);
   color: var(--primary);
   background: var(--primary-light);
   transform: translateY(-1px);
 }
 
-.timing-chip.selected {
+.timing-chip.selected,
+.day-chip.selected {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
   font-weight: var(--font-semibold);
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.helper-text {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  font-weight: var(--font-normal);
+  margin-left: var(--space-1);
 }
 
 /* Input with icon */

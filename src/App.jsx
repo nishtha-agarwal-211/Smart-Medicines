@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { MedicationProvider, useMedications } from './context/MedicationContext';
 import { EmergencyProfileProvider } from './context/EmergencyProfileContext';
 import { UserProfileProvider, useUserProfile } from './context/UserProfileContext';
 import { requestNotificationPermission } from './utils/notifications';
+import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import PrescriptionScanner from './components/PrescriptionScanner';
 import ManualMedicationEntry from './components/ManualMedicationEntry';
@@ -14,9 +16,13 @@ import EmergencyCard from './components/EmergencyCard';
 import UserProfile from './components/UserProfile';
 import Onboarding from './components/Onboarding';
 import NotificationPanel from './components/NotificationPanel';
+import CaregiverShare from './components/CaregiverShare';
+import AdherenceCalendar from './components/AdherenceCalendar';
+import PillVerifier from './components/PillVerifier';
 import {
   LayoutDashboard, Pill, MessageSquare, Shield, User,
-  Moon, Sun, Menu, X, Search, Bell, Plus, Scan, Camera
+  Moon, Sun, Menu, X, Search, Bell, Plus, Scan, Camera, CalendarDays, Users, ScanEye,
+  LogOut, Loader2
 } from 'lucide-react';
 import './styles/main.css';
 
@@ -31,12 +37,16 @@ const PAGE_TITLES = {
   emergency: 'Emergency Profile',
   'emergency-card': 'Emergency Card',
   profile: 'My Profile',
+  caregiver: 'Caregiver Sharing',
+  calendar: 'Adherence Calendar',
+  'pill-verify': 'Pill Verifier',
 };
 
 // Inner app (needs contexts)
 function AppShell() {
   const { profile, updateProfile } = useUserProfile();
   const { medications, missedDoses } = useMedications();
+  const { currentUser, logout } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
   const [prevView, setPrevView] = useState('dashboard');
   const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
@@ -110,6 +120,10 @@ function AppShell() {
     setShowOnboarding(false);
   };
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   // Toast system
   const addToast = useCallback((message, type = 'info') => {
     const id = Date.now();
@@ -140,6 +154,7 @@ function AppShell() {
   const mainNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'medications', label: 'Medications', icon: Pill },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
     { id: 'chat', label: 'AI Assistant', icon: MessageSquare },
     { id: 'emergency', label: 'Emergency', icon: Shield },
   ];
@@ -147,6 +162,8 @@ function AppShell() {
   const actionNavItems = [
     { id: 'scan', label: 'Scan Prescription', icon: Scan },
     { id: 'manual', label: 'Add Manually', icon: Plus },
+    { id: 'caregiver', label: 'Caregiver Share', icon: Users },
+    { id: 'pill-verify', label: 'Pill Verifier', icon: ScanEye },
   ];
 
   return (
@@ -265,12 +282,20 @@ function AppShell() {
           <div className="sidebar-footer">
             <button className="sidebar-user" onClick={() => handleNavigate('profile')}>
               <div className="sidebar-user-avatar">
-                {getInitials(profile.name)}
+                {getInitials(profile.name || currentUser?.displayName)}
               </div>
               <div className="sidebar-user-info">
-                <div className="sidebar-user-name">{profile.name || 'Set up profile'}</div>
-                <div className="sidebar-user-role">Patient</div>
+                <div className="sidebar-user-name">{profile.name || currentUser?.displayName || 'Set up profile'}</div>
+                <div className="sidebar-user-role">{currentUser?.email || 'Patient'}</div>
               </div>
+            </button>
+            <button
+              className="sidebar-logout-btn"
+              onClick={handleLogout}
+              title="Sign Out"
+              aria-label="Sign Out"
+            >
+              <LogOut size={18} />
             </button>
           </div>
         </aside>
@@ -338,6 +363,9 @@ function AppShell() {
               {currentView === 'emergency' && <EmergencyProfile onNavigate={handleNavigate} />}
               {currentView === 'emergency-card' && <EmergencyCard onNavigate={handleNavigate} patientName={profile.name} />}
               {currentView === 'profile' && <UserProfile onNavigate={handleNavigate} />}
+              {currentView === 'caregiver' && <CaregiverShare onNavigate={handleNavigate} />}
+              {currentView === 'calendar' && <AdherenceCalendar onNavigate={handleNavigate} />}
+              {currentView === 'pill-verify' && <PillVerifier onNavigate={handleNavigate} />}
             </div>
           </main>
         </div>
@@ -413,19 +441,46 @@ function AppShell() {
   );
 }
 
-// AppShell needs MedicationProvider context, so we wrap it
-function AppInner() {
+// Loading screen shown while Firebase checks auth state
+function AuthLoadingScreen() {
   return (
-    <MedicationProvider>
-      <AppShellWrapper />
-    </MedicationProvider>
+    <div className="auth-loading-screen">
+      <div className="auth-loading-content">
+        <div className="auth-loading-icon">💊</div>
+        <Loader2 size={28} className="auth-loading-spinner" />
+        <p>Loading Smart Medicine...</p>
+      </div>
+    </div>
   );
 }
 
-function AppShellWrapper() {
+// Auth gate — shows AuthPage or AppShell
+function AuthGate() {
+  const { isAuthenticated, loading, currentUser } = useAuth();
+
+  if (loading) {
+    return <AuthLoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+
+  const userId = currentUser.uid;
+
+  return (
+    <UserProfileProvider userId={userId}>
+      <MedicationProvider userId={userId}>
+        <AppShellWrapper userId={userId} />
+      </MedicationProvider>
+    </UserProfileProvider>
+  );
+}
+
+function AppShellWrapper({ userId }) {
   const { profile } = useUserProfile();
   return (
-    <EmergencyProfileProvider patientName={profile.name}>
+    <EmergencyProfileProvider userId={userId} patientName={profile.name}>
       <AppShell />
     </EmergencyProfileProvider>
   );
@@ -433,8 +488,8 @@ function AppShellWrapper() {
 
 export default function App() {
   return (
-    <UserProfileProvider>
-      <AppInner />
-    </UserProfileProvider>
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
   );
 }

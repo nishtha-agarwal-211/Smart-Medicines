@@ -3,6 +3,7 @@ import { Phone, Mail, Edit2, Trash2, Plus, AlertTriangle, Heart, Droplet, Share2
 import { useEmergencyProfile } from '../context/EmergencyProfileContext';
 import { useMedications } from '../context/MedicationContext';
 import { useUserProfile } from '../context/UserProfileContext';
+import { formatFrequencyText } from '../utils/schedule';
 import EmergencyContactForm from './EmergencyContactForm';
 import AllergyForm from './AllergyForm';
 import MedicalConditionForm from './MedicalConditionForm';
@@ -239,7 +240,7 @@ export default function EmergencyProfile({ onNavigate }) {
                                     />
                                     <div className="checkbox-card-content">
                                         <h4>{med.drugName}</h4>
-                                        <p>{med.dosage} • {med.frequency}</p>
+                                        <p>{med.dosage} • {formatFrequencyText(med)}</p>
                                         {med.warnings && med.warnings.length > 0 && (
                                             <span className="warning-badge">⚠️ Has Warnings</span>
                                         )}

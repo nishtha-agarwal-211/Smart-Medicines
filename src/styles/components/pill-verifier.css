@@ -1,0 +1,397 @@
+/* ===================================================
+   PILL VISUAL VERIFICATION — Camera + AI matching
+   =================================================== */
+
+.pill-verifier-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.pill-verifier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.pill-verifier-header h2 {
+  font-size: var(--text-section-title);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* === SAFETY DISCLAIMER === */
+.pill-safety-disclaimer {
+  background: linear-gradient(135deg, var(--error-light), #FEE2E2);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.pill-safety-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.pill-safety-text {
+  flex: 1;
+}
+
+.pill-safety-text strong {
+  display: block;
+  font-size: var(--text-caption);
+  color: var(--error-dark);
+  margin-bottom: var(--space-1);
+}
+
+.pill-safety-text p {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* === CAPTURE ZONE === */
+.pill-capture-zone {
+  background: var(--bg-surface);
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pill-capture-zone:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.pill-capture-zone.pill-zone-active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  border-style: solid;
+}
+
+.pill-capture-zone.pill-zone-dragover {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.08);
+  transform: scale(1.01);
+}
+
+.pill-capture-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-2xl);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  transition: transform var(--transition-base);
+}
+
+.pill-capture-zone:hover .pill-capture-icon {
+  transform: scale(1.1);
+}
+
+.pill-capture-title {
+  font-size: var(--text-card-title);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.pill-capture-subtitle {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.pill-capture-or {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.pill-capture-buttons {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pill-capture-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: none;
+}
+
+.pill-capture-btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-blue);
+}
+
+.pill-capture-btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.pill-capture-btn-secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+
+.pill-capture-btn-secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-200);
+}
+
+/* === IMAGE PREVIEW === */
+.pill-preview-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pill-preview-img-wrap {
+  width: 100%;
+  max-width: 300px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  background: var(--slate-100);
+}
+
+.pill-preview-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 300px;
+}
+
+.pill-preview-actions {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  justify-content: center;
+}
+
+/* === ANALYZING STATE === */
+.pill-analyzing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.pill-analyzing-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid var(--slate-200);
+  border-top-color: var(--primary);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.pill-analyzing-text {
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+.pill-analyzing-sub {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* === RESULT CARD === */
+.pill-result-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.pill-result-header {
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pill-result-header.result-match {
+  background: linear-gradient(135deg, var(--success-light), #D1FAE5);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.pill-result-header.result-partial {
+  background: linear-gradient(135deg, var(--warning-light), #FEF3C7);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.pill-result-header.result-no-match {
+  background: linear-gradient(135deg, var(--error-light), #FEE2E2);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.pill-result-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.result-match .pill-result-icon {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.result-partial .pill-result-icon {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.result-no-match .pill-result-icon {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.pill-result-summary h3 {
+  font-size: var(--text-card-title);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.pill-result-summary p {
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+}
+
+/* Confidence Meter */
+.pill-confidence-section {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.pill-confidence-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-small);
+  font-weight: var(--font-semibold);
+}
+
+.pill-confidence-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--slate-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.pill-confidence-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s var(--ease-spring);
+}
+
+.confidence-high { background: var(--gradient-success); }
+.confidence-medium { background: var(--gradient-warning); }
+.confidence-low { background: var(--gradient-danger); }
+
+/* Result Details */
+.pill-result-details {
+  padding: var(--space-5);
+}
+
+.pill-result-details h4 {
+  font-size: var(--text-caption);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.pill-detail-row {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--text-caption);
+}
+
+.pill-detail-row:last-child {
+  border-bottom: none;
+}
+
+.pill-detail-label {
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.pill-detail-value {
+  color: var(--text-primary);
+  font-weight: var(--font-medium);
+}
+
+/* Result Actions */
+.pill-result-actions {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  gap: var(--space-3);
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-app);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .pill-capture-zone {
+    padding: var(--space-6);
+    min-height: 160px;
+  }
+
+  .pill-capture-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+}

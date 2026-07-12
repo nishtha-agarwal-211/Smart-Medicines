@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import StorageService from '../utils/StorageService';
 
 const EmergencyProfileContext = createContext();
 
@@ -14,7 +15,7 @@ function generateId() {
     return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function EmergencyProfileProvider({ children }) {
+export function EmergencyProfileProvider({ userId, children }) {
     const [emergencyContacts, setEmergencyContacts] = useState([]);
     const [criticalMedications, setCriticalMedications] = useState([]);
     const [allergies, setAllergies] = useState([]);
@@ -24,13 +25,14 @@ export function EmergencyProfileProvider({ children }) {
         organDonor: false,
         emergencyNotes: ''
     });
+    const [emergencyLoaded, setEmergencyLoaded] = useState(false);
 
-    // Load from localStorage on mount
+    // Subscribe to emergency profile document in Firestore
     useEffect(() => {
-        const stored = localStorage.getItem('emergencyProfile');
-        if (stored) {
-            try {
-                const data = JSON.parse(stored);
+        if (!userId) return;
+
+        const unsubscribe = StorageService.subscribeToDocument(userId, 'emergencyProfile/main', (data) => {
+            if (data) {
                 setEmergencyContacts(data.emergencyContacts || []);
                 setCriticalMedications(data.criticalMedications || []);
                 setAllergies(data.allergies || []);
@@ -40,24 +42,47 @@ export function EmergencyProfileProvider({ children }) {
                     organDonor: false,
                     emergencyNotes: ''
                 });
-            } catch (error) {
-                console.error('Error loading emergency profile:', error);
+            } else {
+                // Try migrating from localStorage
+                try {
+                    const stored = localStorage.getItem('emergencyProfile');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        setEmergencyContacts(parsed.emergencyContacts || []);
+                        setCriticalMedications(parsed.criticalMedications || []);
+                        setAllergies(parsed.allergies || []);
+                        setMedicalConditions(parsed.medicalConditions || []);
+                        setEmergencyInfo(parsed.emergencyInfo || {
+                            bloodType: '',
+                            organDonor: false,
+                            emergencyNotes: ''
+                        });
+                        // Persist migration to Firestore
+                        StorageService.setDocument(userId, 'emergencyProfile/main', parsed);
+                    }
+                } catch (error) {
+                    console.error('Error migrating emergency profile:', error);
+                }
             }
-        }
-    }, []);
+            setEmergencyLoaded(true);
+        });
 
-    // Save to localStorage whenever data changes
-    useEffect(() => {
+        return () => unsubscribe();
+    }, [userId]);
+
+    // Save to Firestore whenever data changes (debounced by React batching)
+    function persistEmergencyProfile(overrides = {}) {
+        if (!userId) return;
         const data = {
-            emergencyContacts,
-            criticalMedications,
-            allergies,
-            medicalConditions,
-            emergencyInfo,
+            emergencyContacts: overrides.emergencyContacts ?? emergencyContacts,
+            criticalMedications: overrides.criticalMedications ?? criticalMedications,
+            allergies: overrides.allergies ?? allergies,
+            medicalConditions: overrides.medicalConditions ?? medicalConditions,
+            emergencyInfo: overrides.emergencyInfo ?? emergencyInfo,
             lastUpdated: new Date().toISOString()
         };
-        localStorage.setItem('emergencyProfile', JSON.stringify(data));
-    }, [emergencyContacts, criticalMedications, allergies, medicalConditions, emergencyInfo]);
+        StorageService.setDocument(userId, 'emergencyProfile/main', data);
+    }
 
     // Emergency Contacts
     function addEmergencyContact(contact) {
@@ -66,40 +91,55 @@ export function EmergencyProfileProvider({ children }) {
             id: generateId(),
             createdAt: new Date().toISOString()
         };
-        setEmergencyContacts(prev => [...prev, newContact]);
+        setEmergencyContacts(prev => {
+            const updated = [...prev, newContact];
+            persistEmergencyProfile({ emergencyContacts: updated });
+            return updated;
+        });
         return newContact;
     }
 
     function updateEmergencyContact(id, updates) {
-        setEmergencyContacts(prev =>
-            prev.map(contact =>
+        setEmergencyContacts(prev => {
+            const updated = prev.map(contact =>
                 contact.id === id ? { ...contact, ...updates } : contact
-            )
-        );
+            );
+            persistEmergencyProfile({ emergencyContacts: updated });
+            return updated;
+        });
     }
 
     function removeEmergencyContact(id) {
-        setEmergencyContacts(prev => prev.filter(contact => contact.id !== id));
+        setEmergencyContacts(prev => {
+            const updated = prev.filter(contact => contact.id !== id);
+            persistEmergencyProfile({ emergencyContacts: updated });
+            return updated;
+        });
     }
 
     function setPrimaryContact(id) {
-        setEmergencyContacts(prev =>
-            prev.map(contact => ({
+        setEmergencyContacts(prev => {
+            const updated = prev.map(contact => ({
                 ...contact,
                 isPrimary: contact.id === id
-            }))
-        );
+            }));
+            persistEmergencyProfile({ emergencyContacts: updated });
+            return updated;
+        });
     }
 
     // Critical Medications
     function markCriticalMedication(medicationId, isCritical) {
-        if (isCritical) {
-            if (!criticalMedications.includes(medicationId)) {
-                setCriticalMedications(prev => [...prev, medicationId]);
+        setCriticalMedications(prev => {
+            let updated;
+            if (isCritical) {
+                updated = prev.includes(medicationId) ? prev : [...prev, medicationId];
+            } else {
+                updated = prev.filter(id => id !== medicationId);
             }
-        } else {
-            setCriticalMedications(prev => prev.filter(id => id !== medicationId));
-        }
+            persistEmergencyProfile({ criticalMedications: updated });
+            return updated;
+        });
     }
 
     // Allergies
@@ -109,20 +149,30 @@ export function EmergencyProfileProvider({ children }) {
             id: generateId(),
             createdAt: new Date().toISOString()
         };
-        setAllergies(prev => [...prev, newAllergy]);
+        setAllergies(prev => {
+            const updated = [...prev, newAllergy];
+            persistEmergencyProfile({ allergies: updated });
+            return updated;
+        });
         return newAllergy;
     }
 
     function updateAllergy(id, updates) {
-        setAllergies(prev =>
-            prev.map(allergy =>
+        setAllergies(prev => {
+            const updated = prev.map(allergy =>
                 allergy.id === id ? { ...allergy, ...updates } : allergy
-            )
-        );
+            );
+            persistEmergencyProfile({ allergies: updated });
+            return updated;
+        });
     }
 
     function removeAllergy(id) {
-        setAllergies(prev => prev.filter(allergy => allergy.id !== id));
+        setAllergies(prev => {
+            const updated = prev.filter(allergy => allergy.id !== id);
+            persistEmergencyProfile({ allergies: updated });
+            return updated;
+        });
     }
 
     // Medical Conditions
@@ -132,25 +182,39 @@ export function EmergencyProfileProvider({ children }) {
             id: generateId(),
             createdAt: new Date().toISOString()
         };
-        setMedicalConditions(prev => [...prev, newCondition]);
+        setMedicalConditions(prev => {
+            const updated = [...prev, newCondition];
+            persistEmergencyProfile({ medicalConditions: updated });
+            return updated;
+        });
         return newCondition;
     }
 
     function updateMedicalCondition(id, updates) {
-        setMedicalConditions(prev =>
-            prev.map(condition =>
+        setMedicalConditions(prev => {
+            const updated = prev.map(condition =>
                 condition.id === id ? { ...condition, ...updates } : condition
-            )
-        );
+            );
+            persistEmergencyProfile({ medicalConditions: updated });
+            return updated;
+        });
     }
 
     function removeMedicalCondition(id) {
-        setMedicalConditions(prev => prev.filter(condition => condition.id !== id));
+        setMedicalConditions(prev => {
+            const updated = prev.filter(condition => condition.id !== id);
+            persistEmergencyProfile({ medicalConditions: updated });
+            return updated;
+        });
     }
 
     // Emergency Info
     function updateEmergencyInfo(updates) {
-        setEmergencyInfo(prev => ({ ...prev, ...updates }));
+        setEmergencyInfo(prev => {
+            const updated = { ...prev, ...updates };
+            persistEmergencyProfile({ emergencyInfo: updated });
+            return updated;
+        });
     }
 
     // Check if profile is complete
@@ -168,6 +232,7 @@ export function EmergencyProfileProvider({ children }) {
         allergies,
         medicalConditions,
         emergencyInfo,
+        emergencyLoaded,
 
         // Emergency Contacts
         addEmergencyContact,

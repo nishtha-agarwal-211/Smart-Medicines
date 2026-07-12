@@ -166,6 +166,9 @@
 .sidebar-footer {
   padding: var(--space-4);
   border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .sidebar-user {
@@ -176,6 +179,8 @@
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-fast);
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar-user:hover {
@@ -214,6 +219,30 @@
 .sidebar-user-role {
   font-size: var(--text-tiny);
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.sidebar-logout-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-logout-btn:hover {
+  background: var(--error-light);
+  color: var(--error);
 }
 
 /* === TOP BAR === */
